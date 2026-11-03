@@ -61,6 +61,7 @@
     .launch-card.number .orb-area { border-color: #e4dbe9; background: #f2edf4; }
     .launch-card.memory .orb-area { border-color: #ead9d4; background: #f7eeeb; }
     .launch-card.slide .orb-area { border-color: #dce5e8; background: #edf3f4; }
+    .launch-card.colorslide .orb-area { border-color: #e7ddd2; background: #f5eee7; }
     .launch-card.gomoku .orb-area { border-color: #e6dfd0; background: #f4f0e6; }
     .launch-card.stroop .orb-area { border-color: #e6dadd; background: #f7eff1; }
     .game-symbol { color: #829da3; }
@@ -82,6 +83,11 @@
     .slide-symbol { display: grid; grid-template-columns: repeat(3, 8px); gap: 2px; }
     .slide-symbol i { display: grid; width: 8px; height: 8px; place-items: center; border-radius: 2px; color: #71868b; background: #d7e4e5; font-size: 5px; font-style: normal; font-weight: 850; }
     .slide-symbol i:last-child { background: #fff; }
+    .colorslide-symbol { display: grid; grid-template-columns: repeat(2, 11px); gap: 3px; transform: rotate(-8deg); }
+    .colorslide-symbol i { width: 11px; height: 7px; border-radius: 3px; background: #e76b73; }
+    .colorslide-symbol i:nth-child(2) { background: #f0bd4f; }
+    .colorslide-symbol i:nth-child(3) { background: #5d9fe3; }
+    .colorslide-symbol i:nth-child(4) { background: #6fbd7c; }
     .gomoku-symbol { display: grid; grid-template-columns: repeat(3, 8px); gap: 3px; }
     .gomoku-symbol i { width: 8px; height: 8px; border: 1px solid #c8bda8; border-radius: 50%; background: #f4f0e6; }
     .gomoku-symbol i:nth-child(2), .gomoku-symbol i:nth-child(5), .gomoku-symbol i:nth-child(8) { background: #c58d8c; border-color: #c58d8c; }
@@ -195,6 +201,26 @@
     .memory-card.matched { border-color: #cddacf; background: #eef3ed; cursor: default; }
     .memory-card.matched .memory-swatch { box-shadow: 0 0 0 3px rgba(143,168,145,.15); }
     .sliding-board { width: min(100%, 610px); grid-template-columns: repeat(var(--slide-size, 3), minmax(0, 1fr)); aspect-ratio: 1; gap: clamp(4px, 1vw, 8px); margin: 0 auto; padding: clamp(7px, 1.4vw, 12px); border-radius: 17px; background: #edf2f1; }
+    .color-slide-card { max-width: 810px; }
+    .color-slide-play { display: grid; gap: 17px; }
+    .color-slide-main { min-width: 0; }
+    .color-slide-topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 auto 11px; }
+    .color-slide-stage { display: grid; width: min(100%, 530px); grid-template-columns: minmax(0, 1fr) 19px; gap: 5px; align-items: stretch; margin: 0 auto; }
+    .color-sliding-board { display: grid; width: 100%; aspect-ratio: 1; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: clamp(3px, .75vw, 6px); padding: clamp(6px, 1.2vw, 10px); overflow: hidden; border: 1px solid #e2e5df; border-radius: 17px; background: #edf0ec; touch-action: none; user-select: none; }
+    .color-slide-block { z-index: 1; display: grid; min-width: 0; min-height: 0; place-items: center; margin: 0; padding: 2px; border: 2px solid rgba(255,255,255,.9); border-radius: clamp(6px, 1.3vw, 11px); color: rgba(255,255,255,.98); box-shadow: 0 2px 5px rgba(45,55,52,.18), inset 0 1px 2px rgba(255,255,255,.28); cursor: grab; touch-action: none; user-select: none; transition: box-shadow .12s ease, filter .12s ease; }
+    .color-slide-block:hover { z-index: 2; filter: brightness(1.04); box-shadow: 0 4px 10px rgba(45,55,52,.24), inset 0 1px 2px rgba(255,255,255,.3); }
+    .color-slide-block:active, .color-slide-block.dragging { z-index: 3; cursor: grabbing; }
+    .color-slide-block.dragging { transition: none; }
+    .color-slide-block.target { border-width: 3px; box-shadow: 0 3px 9px rgba(45,55,52,.22), inset 0 1px 3px rgba(255,255,255,.38); }
+    .color-slide-target-mark { font-size: clamp(16px, 4vw, 27px); font-weight: 900; line-height: 1; text-shadow: 0 1px 3px rgba(80,30,35,.25); }
+    .color-slide-exit { display: grid; grid-template-rows: repeat(6, minmax(0, 1fr)); align-items: center; color: #d96e73; }
+    .color-slide-exit span { display: grid; grid-row: 3; place-items: center; align-self: stretch; font-size: 18px; font-weight: 900; }
+    .color-slide-meta { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; width: min(100%, 530px); margin: 0 auto; }
+    .color-slide-instructions { grid-column: 1 / -1; margin: 0; color: var(--muted); text-align: center; font-size: 11px; line-height: 1.6; }
+    .color-slide-moves { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
+    .color-slide-moves b { color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+    .color-slide-status { grid-column: 1 / -1; margin: 0; text-align: center; }
+    .color-slide-results-dialog .speed-result-stats { max-width: 310px; margin: 0 auto 17px; }
     .slide-tile { display: grid; min-width: 0; place-items: center; border: 1px solid #d9e2df; border-radius: clamp(7px, 1.3vw, 12px); color: #536d71; background: #fff; font-size: clamp(13px, 3.7vw, 25px); font-weight: 850; font-variant-numeric: tabular-nums; box-shadow: 0 2px 0 rgba(76,79,75,.035); cursor: pointer; transition: transform .12s ease, background .12s ease, box-shadow .12s ease; }
     .slide-tile:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(76,91,89,.09); }
     .slide-tile:disabled { cursor: default; }
@@ -307,6 +333,11 @@
       .memory-card { border-radius: 9px; }
       .memory-swatch { border-width: 3px; border-radius: 8px; }
       .gomoku-card { padding: 12px; }
+      .color-slide-card { padding: 14px; }
+      .color-sliding-board { gap: 3px; padding: 6px; border-radius: 12px; }
+      .color-slide-block { border-radius: 6px; }
+      .color-slide-meta { gap: 6px 9px; }
+      .color-slide-instructions { font-size: 10px; }
       .gomoku-setup { padding: 14px; }
       .gomoku-colors { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
       .gomoku-choice { min-height: 60px; }
@@ -358,6 +389,16 @@
       #slide-panel { grid-template-rows: auto auto 1fr auto; row-gap: 4px; }
       #slide-panel .sliding-board { width: 100%; grid-column: 1; grid-row: 1 / 5; gap: 4px; padding: 6px; }
       #slide-panel .puzzle-foot, #slide-panel .puzzle-stats { margin: 0; }
+      #color-slide-panel { max-width: 900px; }
+      #color-slide-play:not([hidden]) { grid-template-columns: min(59vh, 47vw) minmax(0, 1fr); gap: clamp(10px, 2vw, 20px); align-items: center; }
+      #color-slide-play .color-slide-main { min-width: 0; }
+      #color-slide-play .color-slide-stage { width: 100%; grid-template-columns: minmax(0, 1fr) 15px; gap: 4px; }
+      #color-slide-play .color-slide-topline { margin-bottom: 5px; }
+      #color-slide-play .color-slide-meta { width: 100%; grid-template-columns: 1fr; align-content: center; gap: 9px; }
+      #color-slide-play .color-slide-instructions, #color-slide-play .color-slide-status { grid-column: 1; }
+      #color-slide-play .color-slide-instructions { text-align: left; }
+      #color-slide-play .color-slide-status { text-align: left; }
+      #color-slide-play .color-slide-board-info { margin: 0; }
       #gomoku-play:not([hidden]) { grid-template-rows: auto 1fr auto; row-gap: 5px; }
       #gomoku-play .gomoku-board-wrap { width: 100%; grid-column: 1; grid-row: 1 / 4; padding: 5px; border-radius: 12px; }
       #gomoku-play .gomoku-board { width: 100%; }
@@ -442,6 +483,12 @@
           <span class="orb-area" aria-hidden="true"><span class="game-symbol slide-symbol"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i></i><i>7</i><i>8</i><i>6</i></span></span>
           <span class="launch-title" data-i18n="slideTitle">数字滑块</span>
           <span class="launch-copy" data-i18n="slideCardCopy">移动方块，把数字从小到大排序</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card colorslide" type="button" data-game="colorslide">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol colorslide-symbol"><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="colorSlideTitle">颜色滑块</span>
+          <span class="launch-copy" data-i18n="colorSlideCardCopy">滑动彩色方块，为目标方块开路</span>
           <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
         </button>
         <button class="launch-card gomoku" type="button" data-game="gomoku">
@@ -568,6 +615,45 @@
         </div>
       </article>
 
+      <article class="game-card color-slide-card" id="color-slide-panel" hidden>
+        <div class="challenge-ready" id="color-slide-ready">
+          <h2 data-i18n="colorSlideReadyTitle">准备好了吗？</h2>
+          <p data-i18n="colorSlideReadyIntro">拖动彩色长方块，为红色目标方块打开道路，让它从右侧出口离开</p>
+          <button class="action" id="color-slide-start" type="button" data-i18n="startButton">开始</button>
+        </div>
+        <div class="color-slide-play" id="color-slide-play" hidden>
+          <div class="color-slide-main">
+            <div class="color-slide-topline">
+              <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="color-slide-level"></span></span>
+              <span class="puzzle-clock" id="color-slide-clock">00:00.0</span>
+            </div>
+            <div class="color-slide-stage">
+              <div class="color-sliding-board" id="color-slide-board" role="group"></div>
+              <div class="color-slide-exit" aria-hidden="true"><span>→</span></div>
+            </div>
+          </div>
+          <div class="color-slide-meta">
+            <p class="color-slide-instructions" data-i18n="colorSlideInstructions">沿长边拖动方块，为红色目标打开出口</p>
+            <span class="color-slide-moves"><span data-i18n="colorSlideMoveLabel">移动格数</span><b id="color-slide-moves">0</b></span>
+            <p class="status color-slide-status" id="color-slide-status" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="speed-results-overlay" id="color-slide-results" hidden>
+          <section class="speed-results-dialog color-slide-results-dialog" role="dialog" aria-modal="true" aria-labelledby="color-slide-result-title">
+            <h2 id="color-slide-result-title" data-i18n="colorSlideSolvedTitle">成功逃出！</h2>
+            <p class="stroop-results-copy" id="color-slide-result-level"></p>
+            <div class="speed-result-stats">
+              <div class="speed-result-stat"><span data-i18n="colorSlideMoveLabel">移动格数</span><strong id="color-slide-result-moves">0</strong></div>
+              <div class="speed-result-stat"><span data-i18n="totalTime">用时</span><strong id="color-slide-result-time">00:00.0</strong></div>
+            </div>
+            <div class="speed-result-actions">
+              <button class="back-button" id="color-slide-replay" type="button" data-i18n="replayLevel">再玩本关</button>
+              <button class="action" id="color-slide-next" type="button"><span data-i18n="nextLevel">下一关</span><span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+        </div>
+      </article>
+
       <article class="game-card gomoku-card" id="gomoku-panel" hidden>
         <div class="gomoku-setup" id="gomoku-setup">
           <h2 data-i18n="gomokuSetupTitle">棋子颜色设置</h2>
@@ -643,11 +729,18 @@
           numberTitle: '破译密码', numberCardCopy: '密码始终为四位数，可重复', colorTitle: '颜色推理',
           colorCardCopy: '排列颜色，不可重复', playNow: '开始玩', footer: 'By Lila Chen · 吉',
           memoryTitle: '颜色记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', slideTitle: '数字滑块', slideCardCopy: '移动方块，把数字从小到大排序',
+          colorSlideTitle: '颜色滑块', colorSlideCardCopy: '滑动彩色方块，为目标方块开路',
           gomokuTitle: '五子棋', gomokuCardCopy: '先将五颗棋子连成一线（横、竖或斜）的一方获胜',
           stroopTitle: '颜色挑战', stroopCardCopy: '请选择字的颜色，不要选字的意思',
           allGames: '所有游戏', restart: '重新开始', speedSubtitle: '依次点击 1 到 25，时间越短越好',
           numberSubtitle: '密码始终四位数；每 8 关，已知提示会更难', colorSubtitle: '始终猜四格；每 8 关增加一种可选颜色',
           memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', slideSubtitle: '移动方块，把数字从小到大排序',
+          colorSlideSubtitle: '滑动彩色长块，为红色目标块清出通道',
+          colorSlideReadyTitle: '准备好了吗？', colorSlideReadyIntro: '沿长边滑动彩色方块，为红色目标打开道路，让它从右侧出口离开',
+          colorSlideInstructions: '拖动长块沿自身方向移动，为红色目标打开出口', colorSlideMoveLabel: '移动格数',
+          colorSlideStatus: '红色目标需要从右侧出口离开', colorSlideSolvedTitle: '成功逃出！', colorSlideResultLevel: '第 {n} 关完成',
+          colorSlideBoardAria: '颜色滑块棋盘', colorSlideBlockAria: '{color}滑块', colorSlideTargetAria: '红色目标滑块',
+          colorSlideColors: ['橙色', '黄色', '蓝色', '绿色', '紫色', '粉色', '青色', '薄荷色'],
           gomokuSubtitle: '先将五颗棋子连成一线（横、竖或斜）的一方获胜', choosePieceColor: '棋子颜色',
           gomokuSetupCopy: '你先手',
           gomokuSetupTitle: '棋子颜色设置', gomokuSkillPrompt: '你的程度', gomokuBeginner: '新手', gomokuSkilled: '熟练',
@@ -695,11 +788,18 @@
           numberTitle: 'Code Breaker', numberCardCopy: 'The code is always four digits and may repeat', colorTitle: 'Color Logic',
           colorCardCopy: 'Arrange the colors with no repeats', playNow: 'Play now', footer: 'By Lila Chen · 吉',
           memoryTitle: 'Color Memory', memoryCardCopy: 'Flip the cards and find matching colors', slideTitle: 'Number Slide', slideCardCopy: 'Move the tiles to arrange the numbers from smallest to largest',
+          colorSlideTitle: 'Color Slide', colorSlideCardCopy: 'Slide the colored blocks to clear a path for the target',
           gomokuTitle: 'Gomoku', gomokuCardCopy: 'Connect five stones in a row, column, or diagonal to win',
           stroopTitle: 'Color Challenge', stroopCardCopy: 'Choose the ink color, not what the word means',
           allGames: 'All games', restart: 'Start over', speedSubtitle: 'Tap 1 to 25 in order as fast as you can',
           numberSubtitle: 'The code stays four digits; the clue gets harder every 8 levels', colorSubtitle: 'The code stays four slots; every 8 levels adds one color option',
           memorySubtitle: 'Remember where each color is and find every matching pair', slideSubtitle: 'Move the tiles to arrange the numbers from smallest to largest',
+          colorSlideSubtitle: 'Slide the colored blocks to clear a path for the red target',
+          colorSlideReadyTitle: 'Ready?', colorSlideReadyIntro: 'Slide each block along its long side and clear a path for the red target to exit on the right',
+          colorSlideInstructions: 'Drag each block along its direction to clear the exit for the red target', colorSlideMoveLabel: 'Tiles moved',
+          colorSlideStatus: 'Guide the red target out through the exit on the right', colorSlideSolvedTitle: 'Escaped!', colorSlideResultLevel: 'Level {n} complete',
+          colorSlideBoardAria: 'Color slide puzzle board', colorSlideBlockAria: '{color} block', colorSlideTargetAria: 'Red target block',
+          colorSlideColors: ['Orange', 'Yellow', 'Blue', 'Green', 'Purple', 'Pink', 'Teal', 'Mint'],
           gomokuSubtitle: 'Connect five stones in a row, column, or diagonal to win', choosePieceColor: 'Stone color',
           gomokuSetupCopy: 'You go first',
           gomokuSetupTitle: 'Stone color settings', gomokuSkillPrompt: 'Your level', gomokuBeginner: 'Beginner', gomokuSkilled: 'Skilled',
@@ -748,6 +848,7 @@
         { nameIndex: 6, hex: '#c58fa0' }, { nameIndex: 7, hex: '#7ca49c' }, { nameIndex: 8, hex: '#9fa56f' },
         { nameIndex: 9, hex: '#a78c75' }
       ];
+      const colorSlideCarPalette = ['#ee8b52', '#f0bd4f', '#5d9fe3', '#6fbd7c', '#a579d0', '#e78ab4', '#55bdb3', '#64c9a5'];
       const gomokuWhite = '#fffdfa';
       const gomokuColors = [...palette.map((color) => ({ hex: color.hex, nameIndex: color.nameIndex })), { hex: gomokuWhite, white: true }];
       const stroopColors = [
@@ -783,6 +884,7 @@
       const password = { mode: '', level: 1, length: 4, target: [], guess: [], history: [], locked: false, jumpBackIndex: -1, helpKey: 'initialHelp', helpParams: {}, nextTimer: 0 };
       const memory = { level: 1, pairs: 6, cards: [], matched: new Set(), open: [], flips: 0, turns: 0, locked: false, startedAt: 0, elapsed: 0, clock: 0, pendingTimer: 0, nextTimer: 0, statusKey: 'memoryReady' };
       const slide = { level: 1, size: 3, tiles: [], moves: 0, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, finished: false, statusKey: 'slideReady' };
+      const colorSlide = { level: 1, blocks: [], puzzle: [], moves: 0, startedAt: 0, elapsed: 0, clock: 0, started: false, finished: false, drag: null };
       let savedGomokuProfile = { skill: 'beginner', beginnerGames: 0, skilledGames: 0 };
       try {
         const saved = JSON.parse(localStorage.getItem('number-playground-gomoku-profile') || 'null');
@@ -811,6 +913,7 @@
       const passwordPanel = $('password-panel');
       const memoryPanel = $('memory-panel');
       const slidePanel = $('slide-panel');
+      const colorSlidePanel = $('color-slide-panel');
       const gomokuPanel = $('gomoku-panel');
       const stroopPanel = $('stroop-panel');
       const speedStatus = $('speed-status');
@@ -844,6 +947,7 @@
         if (activeGame === 'number' || activeGame === 'color') renderPassword();
         if (activeGame === 'memory') renderMemory();
         if (activeGame === 'slide') renderSlide();
+        if (activeGame === 'colorslide') renderColorSlide();
         if (activeGame === 'gomoku') { renderGomokuSetup(); if (gomoku.active) renderGomokuBoard(); }
         if (activeGame === 'stroop') renderStroop();
       }
@@ -856,7 +960,7 @@
         const gameKeys = {
           speed: ['speedTitle', 'speedSubtitle'], number: ['numberTitle', 'numberSubtitle'], color: ['colorTitle', 'colorSubtitle'],
           memory: ['memoryTitle', 'memorySubtitle'], slide: ['slideTitle', 'slideSubtitle'], gomoku: ['gomokuTitle', 'gomokuSubtitle'],
-          stroop: ['stroopTitle', 'stroopSubtitle']
+          stroop: ['stroopTitle', 'stroopSubtitle'], colorslide: ['colorSlideTitle', 'colorSlideSubtitle']
         };
         const [titleKey, subtitleKey] = gameKeys[activeGame] || gameKeys.speed;
         $('game-title').textContent = t(titleKey);
@@ -953,10 +1057,16 @@
         if (slide.clock) window.clearInterval(slide.clock);
         slide.clock = 0;
       }
+      function stopColorSlideClock() {
+        if (colorSlide.clock) window.clearInterval(colorSlide.clock);
+        colorSlide.clock = 0;
+      }
       function memoryElapsed() { return memory.startedAt ? performance.now() - memory.startedAt : memory.elapsed; }
       function slideElapsed() { return slide.startedAt ? performance.now() - slide.startedAt : slide.elapsed; }
+      function colorSlideElapsed() { return colorSlide.startedAt ? performance.now() - colorSlide.startedAt : colorSlide.elapsed; }
       function updateMemoryClock() { if (activeGame === 'memory') $('memory-clock').textContent = formatTime(memoryElapsed()); }
       function updateSlideClock() { if (activeGame === 'slide') $('slide-clock').textContent = formatTime(slideElapsed()); }
+      function updateColorSlideClock() { if (activeGame === 'colorslide' && !colorSlide.finished) $('color-slide-clock').textContent = formatTime(colorSlideElapsed()); }
       function getMemoryPairs(level = memory.level) { return 6 + Math.floor((level - 1) / 9); }
       function getMemoryColumns(pairs) { return pairs <= 8 ? 4 : pairs <= 18 ? 6 : 8; }
       function getMemoryColor(index) {
@@ -1160,6 +1270,207 @@
           slide.nextTimer = window.setTimeout(() => { slide.level++; beginSlideLevel(); }, 1250);
         } else renderSlide();
       }
+
+      function colorSlideBlocksOverlap(a, b) {
+        const aWidth = a.orientation === 'h' ? a.length : 1;
+        const aHeight = a.orientation === 'v' ? a.length : 1;
+        const bWidth = b.orientation === 'h' ? b.length : 1;
+        const bHeight = b.orientation === 'v' ? b.length : 1;
+        return a.x < b.x + bWidth && a.x + aWidth > b.x && a.y < b.y + bHeight && a.y + aHeight > b.y;
+      }
+      function colorSlidePositionIsOpen(block, x, y, blocks = colorSlide.blocks) {
+        const width = block.orientation === 'h' ? block.length : 1;
+        const height = block.orientation === 'v' ? block.length : 1;
+        if (x < 0 || y < 0 || x + width > 6 || y + height > 6) return false;
+        const candidate = { ...block, x, y };
+        return blocks.every((other) => other.id === block.id || !colorSlideBlocksOverlap(candidate, other));
+      }
+      function colorSlideMoveBounds(block, blocks = colorSlide.blocks) {
+        let negative = 0; let positive = 0;
+        for (let distance = 1; distance <= 6; distance++) {
+          const x = block.x + (block.orientation === 'h' ? -distance : 0);
+          const y = block.y + (block.orientation === 'v' ? -distance : 0);
+          if (!colorSlidePositionIsOpen(block, x, y, blocks)) break;
+          negative = distance;
+        }
+        for (let distance = 1; distance <= 6; distance++) {
+          const x = block.x + (block.orientation === 'h' ? distance : 0);
+          const y = block.y + (block.orientation === 'v' ? distance : 0);
+          if (!colorSlidePositionIsOpen(block, x, y, blocks)) break;
+          positive = distance;
+        }
+        return { negative, positive };
+      }
+      function makeColorSlidePuzzle(level) {
+        const blocks = [{ id: 'target', orientation: 'h', length: 2, x: 4, y: 2, color: '#e76b73', target: true }];
+        const desiredCars = Math.min(13, 6 + Math.floor((level - 1) / 3));
+        while (blocks.length - 1 < desiredCars) {
+          let placed = false;
+          for (let attempt = 0; attempt < 700 && !placed; attempt++) {
+            const orientation = Math.random() < .52 ? 'h' : 'v';
+            const length = Math.random() < .28 ? 3 : 2;
+            const block = {
+              id: `block-${blocks.length}`, orientation, length,
+              x: Math.floor(Math.random() * (orientation === 'h' ? 7 - length : 6)),
+              y: Math.floor(Math.random() * (orientation === 'v' ? 7 - length : 6)),
+              color: colorSlideCarPalette[(blocks.length - 1) % colorSlideCarPalette.length]
+            };
+            const crossesTargetLane = Array.from({ length: orientation === 'v' ? length : 1 }, (_, offset) => block.y + offset).includes(2);
+            if (crossesTargetLane || blocks.some((other) => colorSlideBlocksOverlap(block, other))) continue;
+            blocks.push(block); placed = true;
+          }
+          if (!placed) break;
+        }
+        blocks[0].x = 3;
+        let previous = null;
+        const shuffleSteps = 12 + Math.min(28, level * 2);
+        for (let step = 0; step < shuffleSteps; step++) {
+          let choices = [];
+          for (const block of blocks) {
+            const bounds = colorSlideMoveBounds(block, blocks);
+            for (let delta = -bounds.negative; delta <= bounds.positive; delta++) {
+              if (!delta) continue;
+              if (block.target && block.x + delta >= 4) continue;
+              if (previous && previous.id === block.id && previous.delta === -delta) continue;
+              choices.push({ id: block.id, delta });
+            }
+          }
+          if (!choices.length) {
+            for (const block of blocks) {
+              const bounds = colorSlideMoveBounds(block, blocks);
+              for (let delta = -bounds.negative; delta <= bounds.positive; delta++) {
+                if (delta && (!block.target || block.x + delta < 4)) choices.push({ id: block.id, delta });
+              }
+            }
+          }
+          if (!choices.length) break;
+          const move = choices[Math.floor(Math.random() * choices.length)];
+          const block = blocks.find((item) => item.id === move.id);
+          if (block.orientation === 'h') block.x += move.delta; else block.y += move.delta;
+          previous = move;
+        }
+        return blocks.map((block) => ({ ...block }));
+      }
+      function beginColorSlideLevel(makeNewPuzzle = true, startNow = false) {
+        stopColorSlideClock();
+        if (makeNewPuzzle || !colorSlide.puzzle.length) colorSlide.puzzle = makeColorSlidePuzzle(colorSlide.level);
+        colorSlide.blocks = colorSlide.puzzle.map((block) => ({ ...block }));
+        colorSlide.moves = 0; colorSlide.startedAt = 0; colorSlide.elapsed = 0;
+        colorSlide.started = startNow; colorSlide.finished = false; colorSlide.drag = null;
+        renderColorSlide();
+      }
+      function prepareColorSlideGame() {
+        colorSlide.level = 1;
+        beginColorSlideLevel(true, false);
+      }
+      function startColorSlideGame() {
+        if (!colorSlide.puzzle.length) colorSlide.puzzle = makeColorSlidePuzzle(colorSlide.level);
+        colorSlide.started = true;
+        renderColorSlide();
+      }
+      function renderColorSlide() {
+        $('color-slide-ready').hidden = colorSlide.started;
+        $('color-slide-play').hidden = !colorSlide.started;
+        $('color-slide-results').hidden = !colorSlide.finished;
+        $('color-slide-level').textContent = t('level', { n: colorSlide.level });
+        $('color-slide-clock').textContent = formatTime(colorSlideElapsed());
+        $('color-slide-moves').textContent = String(colorSlide.moves);
+        $('color-slide-status').textContent = t('colorSlideStatus');
+        if (colorSlide.finished) {
+          $('color-slide-result-level').textContent = t('colorSlideResultLevel', { n: colorSlide.level });
+          $('color-slide-result-moves').textContent = String(colorSlide.moves);
+          $('color-slide-result-time').textContent = formatTime(colorSlide.elapsed);
+        }
+        const board = $('color-slide-board');
+        const focusedBlockId = document.activeElement?.classList.contains('color-slide-block') ? document.activeElement.dataset.blockId : '';
+        board.setAttribute('aria-label', t('colorSlideBoardAria'));
+        board.replaceChildren();
+        if (colorSlide.started) colorSlide.blocks.forEach((block) => {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = `color-slide-block${block.orientation === 'v' ? ' vertical' : ''}${block.target ? ' target' : ''}`;
+          button.style.gridColumn = block.orientation === 'h' ? `${block.x + 1} / span ${block.length}` : String(block.x + 1);
+          button.style.gridRow = block.orientation === 'v' ? `${block.y + 1} / span ${block.length}` : String(block.y + 1);
+          button.dataset.blockId = block.id;
+          button.style.backgroundColor = block.color;
+          button.setAttribute('aria-label', block.target ? t('colorSlideTargetAria') : t('colorSlideBlockAria', { color: word('colorSlideColors', (colorSlide.blocks.indexOf(block) - 1) % 8) }));
+          if (block.target) {
+            const mark = document.createElement('span'); mark.className = 'color-slide-target-mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = '→'; button.append(mark);
+          }
+          button.addEventListener('pointerdown', (event) => startColorSlideDrag(event, block.id));
+          button.addEventListener('pointermove', moveColorSlideDrag);
+          button.addEventListener('pointerup', finishColorSlideDrag);
+          button.addEventListener('pointercancel', cancelColorSlideDrag);
+          button.addEventListener('keydown', (event) => moveColorSlideWithKey(event, block.id));
+          board.append(button);
+          if (block.id === focusedBlockId) button.focus({ preventScroll: true });
+        });
+      }
+      function startColorSlideClock() {
+        if (colorSlide.startedAt) return;
+        colorSlide.startedAt = performance.now();
+        colorSlide.clock = window.setInterval(updateColorSlideClock, 100);
+      }
+      function moveColorSlideBlock(id, delta) {
+        if (!colorSlide.started || colorSlide.finished || !delta) return;
+        const block = colorSlide.blocks.find((item) => item.id === id);
+        if (!block) return;
+        const nextX = block.x + (block.orientation === 'h' ? delta : 0);
+        const nextY = block.y + (block.orientation === 'v' ? delta : 0);
+        if (!colorSlidePositionIsOpen(block, nextX, nextY)) return;
+        startColorSlideClock();
+        block.x = nextX; block.y = nextY; colorSlide.moves += Math.abs(delta);
+        if (block.target && block.x + block.length === 6) {
+          colorSlide.elapsed = colorSlideElapsed(); colorSlide.startedAt = 0; stopColorSlideClock();
+          colorSlide.finished = true;
+          renderColorSlide();
+          $('color-slide-replay').focus();
+        } else renderColorSlide();
+      }
+      function startColorSlideDrag(event, id) {
+        if (!colorSlide.started || colorSlide.finished || event.button > 0) return;
+        const block = colorSlide.blocks.find((item) => item.id === id);
+        if (!block) return;
+        event.preventDefault();
+        const board = $('color-slide-board'); const style = getComputedStyle(board);
+        const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+        const gap = parseFloat(style.columnGap);
+        const cellStep = (board.clientWidth - padding - gap * 5) / 6 + gap;
+        const bounds = colorSlideMoveBounds(block);
+        colorSlide.drag = { id, pointerId: event.pointerId, x: event.clientX, y: event.clientY, step: cellStep, bounds, element: event.currentTarget, offset: 0, axis: block.orientation === 'h' ? 'x' : 'y' };
+        event.currentTarget.classList.add('dragging');
+        try { event.currentTarget.setPointerCapture(event.pointerId); } catch (_) {}
+      }
+      function moveColorSlideDrag(event) {
+        const drag = colorSlide.drag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const raw = drag.axis === 'x' ? event.clientX - drag.x : event.clientY - drag.y;
+        drag.offset = Math.max(-drag.bounds.negative * drag.step, Math.min(drag.bounds.positive * drag.step, raw));
+        drag.element.style.transform = drag.axis === 'x' ? `translateX(${drag.offset}px)` : `translateY(${drag.offset}px)`;
+      }
+      function finishColorSlideDrag(event) {
+        const drag = colorSlide.drag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const cells = Math.round(drag.offset / drag.step);
+        drag.element.classList.remove('dragging'); drag.element.style.transform = '';
+        colorSlide.drag = null;
+        if (cells) moveColorSlideBlock(drag.id, cells);
+      }
+      function cancelColorSlideDrag(event) {
+        const drag = colorSlide.drag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        drag.element.classList.remove('dragging'); drag.element.style.transform = '';
+        colorSlide.drag = null;
+      }
+      function moveColorSlideWithKey(event, id) {
+        const block = colorSlide.blocks.find((item) => item.id === id);
+        if (!block) return;
+        const keys = block.orientation === 'h' ? { ArrowLeft: -1, ArrowRight: 1 } : { ArrowUp: -1, ArrowDown: 1 };
+        if (!(event.key in keys)) return;
+        event.preventDefault();
+        moveColorSlideBlock(id, keys[event.key]);
+      }
+      function replayColorSlideLevel() { beginColorSlideLevel(false, true); }
+      function advanceColorSlideLevel() { colorSlide.level++; beginColorSlideLevel(true, true); }
 
       function gomokuColorLabel(hex) {
         const choice = gomokuColors.find((color) => color.hex === hex);
@@ -1669,13 +1980,14 @@
       function openGame(id) {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
-        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock();
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock();
         window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0; stopStroopClock();
         activeGame = id;
         homeView.hidden = true; gameView.hidden = false;
         speedPanel.hidden = id !== 'speed';
         passwordPanel.hidden = id !== 'number' && id !== 'color';
         memoryPanel.hidden = id !== 'memory'; slidePanel.hidden = id !== 'slide';
+        colorSlidePanel.hidden = id !== 'colorslide';
         gomokuPanel.hidden = id !== 'gomoku';
         stroopPanel.hidden = id !== 'stroop';
         renderGameHeading();
@@ -1683,6 +1995,7 @@
         else if (id === 'number' || id === 'color') startPasswordGame(id);
         else if (id === 'memory') startMemoryGame();
         else if (id === 'slide') startSlideGame();
+        else if (id === 'colorslide') prepareColorSlideGame();
         else if (id === 'gomoku') resetGomokuSetup();
         else if (id === 'stroop') prepareStroopGame();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1690,7 +2003,7 @@
       function goHome() {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
-        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock(); stopStroopClock();
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock(); stopStroopClock();
         resetGomokuSetup(); activeGame = '';
         gameView.hidden = true; homeView.hidden = false;
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1704,6 +2017,7 @@
         else if (activeGame === 'number' || activeGame === 'color') beginPasswordLevel();
         else if (activeGame === 'memory') beginMemoryLevel();
         else if (activeGame === 'slide') beginSlideLevel();
+        else if (activeGame === 'colorslide') beginColorSlideLevel(false, false);
         else if (activeGame === 'gomoku') restartGomokuMatch();
         else if (activeGame === 'stroop') { if (stroop.started) beginStroopRound(); else prepareStroopGame(); }
       }
@@ -1715,6 +2029,9 @@
       $('speed-start').addEventListener('click', startSpeedGame);
       $('speed-result-replay').addEventListener('click', () => { prepareSpeedGame(); $('speed-start').focus(); });
       $('speed-result-home').addEventListener('click', goHome);
+      $('color-slide-start').addEventListener('click', startColorSlideGame);
+      $('color-slide-replay').addEventListener('click', replayColorSlideLevel);
+      $('color-slide-next').addEventListener('click', advanceColorSlideLevel);
       $('gomoku-start').addEventListener('click', startGomokuMatch);
       $('gomoku-change-color').addEventListener('click', resetGomokuSetup);
       $('gomoku-next-round').addEventListener('click', startGomokuMatch);
