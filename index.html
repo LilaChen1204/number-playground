@@ -153,6 +153,7 @@
     .action:hover:not(:disabled) { transform: translateY(-1px); background: var(--violet-dark); }
     .action:disabled { cursor: default; }
     .stats { display: flex; gap: 8px; margin-top: 14px; }
+    .record-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .schulte-leaderboard { margin-top: 16px; padding: 13px; border: 1px solid #e7e2d9; border-radius: 13px; background: #fbfaf7; }
     .schulte-leaderboard h2 { margin: 0 0 8px; font-size: 12px; }
     .schulte-leaderboard ol { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
@@ -329,6 +330,8 @@
     .stroop-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
     .stroop-round { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; color: #6d828a; background: #eff2f0; font-size: 10px; font-weight: 850; }
     .stroop-clock { color: var(--ink); font-size: 20px; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .stroop-best-record { display: flex; justify-content: flex-end; gap: 6px; margin: -8px 1px 10px; color: var(--muted); font-size: 10px; }
+    .stroop-best-record b { color: var(--ink); font-variant-numeric: tabular-nums; }
     .stroop-instruction { margin: 0 0 13px; color: var(--muted); text-align: center; font-size: 11px; }
     .stroop-progress { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 1px 12px; }
     .stroop-question-number { color: var(--muted); font-size: 10px; font-weight: 750; }
@@ -345,7 +348,7 @@
     .stroop-results { padding: 23px; border: 1px solid #e7e2d8; border-radius: 17px; background: linear-gradient(145deg, #faf8f2, #fff); text-align: center; }
     .stroop-results h2 { margin: 0; font-size: 20px; }
     .stroop-results-copy { margin: 8px 0 17px; color: var(--muted); font-size: 11px; }
-    .stroop-result-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 17px; }
+    .stroop-result-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-bottom: 17px; }
     .stroop-result-stat { padding: 12px 7px; border-radius: 12px; background: #f4f4ef; }
     .stroop-result-stat span { display: block; color: var(--muted); font-size: 9px; }
     .stroop-result-stat b { display: block; margin-top: 4px; font-size: 17px; font-variant-numeric: tabular-nums; }
@@ -384,6 +387,7 @@
       .memory-board { grid-template-columns: repeat(var(--memory-columns-mobile, 4), minmax(0, 1fr)); padding: 8px; gap: 6px; }
       .memory-card { border-radius: 9px; }
       .memory-swatch { border-width: 3px; border-radius: 8px; }
+      .stroop-result-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .gomoku-card { padding: 12px; }
       .color-slide-card { padding: 14px; }
       .color-sliding-board { gap: 3px; padding: 6px; border-radius: 12px; }
@@ -553,13 +557,13 @@
         </button>
         <button class="launch-card memory" type="button" data-game="memory">
           <span class="orb-area" aria-hidden="true"><span class="game-symbol memory-symbol"><i></i><i></i><i></i><i></i></span></span>
-          <span class="launch-title" data-i18n="memoryTitle">颜色记忆</span>
+          <span class="launch-title" data-i18n="memoryTitle">卡牌记忆</span>
           <span class="launch-copy" data-i18n="memoryCardCopy">翻开卡牌，找出相同颜色的配对</span>
           <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
         </button>
         <button class="launch-card colorfind" type="button" data-game="colorfind">
           <span class="orb-area" aria-hidden="true"><span class="game-symbol colorfind-symbol"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
-          <span class="launch-title" data-i18n="colorFindTitle">颜色找不同</span>
+          <span class="launch-title" data-i18n="colorFindTitle">找不同</span>
           <span class="launch-copy" data-i18n="colorFindCardCopy">找出16个色块中唯一不同的颜色</span>
           <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
         </button>
@@ -583,8 +587,8 @@
         </button>
         <button class="launch-card stroop" type="button" data-game="stroop">
           <span class="orb-area" aria-hidden="true"><span class="game-symbol stroop-symbol">C</span></span>
-          <span class="launch-title" data-i18n="stroopTitle">颜色挑战</span>
-          <span class="launch-copy" data-i18n="stroopCardCopy">请选择字的颜色，不要选字的意思</span>
+          <span class="launch-title" data-i18n="stroopTitle">颜色炸弹</span>
+          <span class="launch-copy" data-i18n="stroopCardCopy">选择字的颜色，不选字的意思</span>
           <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
         </button>
       </div>
@@ -656,7 +660,7 @@
           </div>
           <div class="progress-dots" id="progress-dots" data-i18n-aria="levelProgressAria"></div>
           <div class="clue-box">
-            <div class="clue-title"><span data-i18n="knownClue">已知提示</span><span data-i18n="clueCountNote">这组猜测有几个对了</span></div>
+            <div class="clue-title"><span data-i18n="knownClue">已知提示</span></div>
             <div class="clue-content"><div class="sequence" id="clue-sequence"></div><span class="clue-result" id="clue-result"></span></div>
           </div>
           <p class="rule-note" id="rule-note"></p>
@@ -669,7 +673,7 @@
           </div>
         </div>
         <div class="history-wrap">
-          <div class="history-head"><span data-i18n="guessHistory">猜测记录</span><span data-i18n="yourGuesses">你的每次尝试</span></div>
+          <div class="history-head"><span data-i18n="guessHistory">猜测记录</span><span data-i18n="yourGuesses">正确个数</span></div>
           <div class="history" id="history" aria-live="polite"></div>
         </div>
       </article>
@@ -687,16 +691,17 @@
         <div class="game-foot puzzle-foot">
           <div class="status" id="memory-status" aria-live="polite"></div>
         </div>
-        <div class="stats puzzle-stats" data-i18n-aria="memoryStatsAria">
+        <div class="stats puzzle-stats record-stats" data-i18n-aria="memoryStatsAria">
           <div class="stat"><span class="stat-label" data-i18n="memoryFlips">翻牌次数</span><span class="stat-value" id="memory-flips">0</span></div>
           <div class="stat"><span class="stat-label" data-i18n="memoryMatched">已配对</span><span class="stat-value" id="memory-matched">0 / 6</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="recordFewestMoves">累计最少步数</span><span class="stat-value" id="memory-best-moves">—</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="bestTime">最快记录</span><span class="stat-value" id="memory-best-time">—</span></div>
         </div>
       </article>
 
       <article class="game-card puzzle-card" id="colorfind-panel" hidden>
         <div class="puzzle-topline">
           <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="colorfind-level"></span></span>
-          <span class="puzzle-clock" id="colorfind-clock">00:00.0</span>
         </div>
         <div class="board-info">
           <span class="next-label" data-i18n="colorFindInstruction">找出4×4方格里唯一不同的色块</span>
@@ -705,7 +710,7 @@
         <div class="puzzle-board colorfind-board" id="colorfind-board" role="group"></div>
         <div class="game-foot puzzle-foot"><div class="status" id="colorfind-status" aria-live="polite"></div></div>
         <div class="stats puzzle-stats" data-i18n-aria="colorFindStatsAria">
-          <div class="stat"><span class="stat-label" data-i18n="colorFindCorrectLabel">连续找对</span><span class="stat-value" id="colorfind-correct">0</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="colorFindCorrectLabel">累计找对</span><span class="stat-value" id="colorfind-correct">0</span></div>
           <div class="stat"><span class="stat-label" data-i18n="colorFindDifficultyLabel">颜色差异</span><span class="stat-value" id="colorfind-difficulty">明显</span></div>
         </div>
       </article>
@@ -723,23 +728,24 @@
         <div class="game-foot puzzle-foot">
           <div class="status" id="slide-status" aria-live="polite"></div>
         </div>
-        <div class="stats puzzle-stats" data-i18n-aria="slideStatsAria">
+        <div class="stats puzzle-stats record-stats" data-i18n-aria="slideStatsAria">
           <div class="stat"><span class="stat-label" data-i18n="slideMovesLabel">移动次数</span><span class="stat-value" id="slide-move-stat">0</span></div>
           <div class="stat"><span class="stat-label" data-i18n="slideBoardLabel">棋盘</span><span class="stat-value" id="slide-board-stat">3 × 3</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="recordFewestMoves">累计最少步数</span><span class="stat-value" id="slide-best-moves">—</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="bestTime">最快记录</span><span class="stat-value" id="slide-best-time">—</span></div>
         </div>
       </article>
 
       <article class="game-card color-slide-card" id="color-slide-panel" hidden>
         <div class="challenge-ready" id="color-slide-ready">
           <h2 data-i18n="colorSlideReadyTitle">准备好了吗？</h2>
-          <p data-i18n="colorSlideReadyIntro">把所有的色块推出场地即可</p>
+          <p data-i18n="colorSlideReadyIntro">移开挡块，把红色色块推出右侧即可</p>
           <button class="action" id="color-slide-start" type="button" data-i18n="startButton">开始</button>
         </div>
         <div class="color-slide-play" id="color-slide-play" hidden>
           <div class="color-slide-main">
             <div class="color-slide-topline">
               <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="color-slide-level"></span></span>
-              <span class="puzzle-clock" id="color-slide-clock">00:00.0</span>
             </div>
             <div class="color-slide-stage">
               <div class="color-sliding-board" id="color-slide-board" role="group"></div>
@@ -747,7 +753,7 @@
             </div>
           </div>
           <div class="color-slide-meta">
-            <p class="color-slide-instructions" data-i18n="colorSlideInstructions">沿长边滑动色块，按箭头方向推出边界；红色块要连续用力推出三次</p>
+            <p class="color-slide-instructions" data-i18n="colorSlideInstructions">只能移动色块，不能推出边界；移开挡块后把红色色块推出右侧</p>
             <span class="color-slide-moves"><span data-i18n="colorSlideMoveLabel">推动次数</span><b id="color-slide-moves">0</b></span>
             <p class="status color-slide-status" id="color-slide-status" aria-live="polite"></p>
           </div>
@@ -758,7 +764,6 @@
             <p class="stroop-results-copy" id="color-slide-result-level"></p>
             <div class="speed-result-stats">
               <div class="speed-result-stat"><span data-i18n="colorSlideMoveLabel">推动次数</span><strong id="color-slide-result-moves">0</strong></div>
-              <div class="speed-result-stat"><span data-i18n="totalTime">用时</span><strong id="color-slide-result-time">00:00.0</strong></div>
             </div>
             <div class="speed-result-actions">
               <button class="back-button" id="color-slide-replay" type="button" data-i18n="replayLevel">再玩本关</button>
@@ -800,8 +805,8 @@
 
       <article class="game-card stroop-card" id="stroop-panel" hidden>
         <div class="challenge-ready" id="stroop-ready">
-          <h2 data-i18n="stroopReadyTitle">准备开始颜色挑战？</h2>
-          <p data-i18n="stroopStartIntro">请选择字的颜色，不要选字的意思</p>
+          <h2 data-i18n="stroopReadyTitle">准备好了吗？</h2>
+          <p data-i18n="stroopStartIntro">选择字的颜色，不选字的意思</p>
           <button class="action" id="stroop-start" type="button" data-i18n="startButton">开始</button>
         </div>
         <div id="stroop-round-view">
@@ -809,6 +814,7 @@
             <span class="stroop-round"><span aria-hidden="true">✦</span><span id="stroop-level"></span></span>
             <span class="stroop-clock" id="stroop-clock">00:00.0</span>
           </div>
+          <p class="stroop-best-record"><span data-i18n="bestTime">最快记录</span><b id="stroop-best-time">—</b></p>
           <div class="stroop-progress">
             <span class="stroop-question-number" id="stroop-question-count"></span>
             <span class="stroop-scoreline"><span><b id="stroop-correct">0</b> <span data-i18n="correctShort">答对</span></span><span><b class="wrong-count" id="stroop-wrong">0</b> <span data-i18n="wrongShort">答错</span></span></span>
@@ -824,6 +830,7 @@
             <div class="stroop-result-stat"><span data-i18n="correctCount">答对</span><b id="stroop-result-correct">0</b></div>
             <div class="stroop-result-stat"><span data-i18n="wrongCount">答错</span><b id="stroop-result-wrong">0</b></div>
             <div class="stroop-result-stat"><span data-i18n="totalTime">用时</span><b id="stroop-result-time">00:00.0</b></div>
+            <div class="stroop-result-stat"><span data-i18n="bestTime">最快记录</span><b id="stroop-result-best">—</b></div>
           </div>
           <div class="stroop-result-actions">
             <button class="back-button" id="stroop-replay" type="button" data-i18n="replayLevel">再玩本关</button>
@@ -848,23 +855,23 @@
           privateStats: '仅你可见的网站数据', onlineNow: '当前在线', totalVisits: '累计访问', registeredPlayers: '注册玩家',
           schulteLeaderboard: '舒尔特方格排行榜', leaderboardEmpty: '还没有成绩',
           homeCopy: '每天十分钟，大脑更轻松', speedTitle: '舒尔特方格', speedCardCopy: '依次点击 1 到 25，时间越短越好',
-          numberTitle: '破译密码', numberCardCopy: '密码始终为四位数，可重复', colorTitle: '颜色推理',
-          colorCardCopy: '排列颜色，不可重复', playNow: '开始玩', footer: 'By Lila Chen · 吉',
-          memoryTitle: '颜色记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', colorFindTitle: '颜色找不同',
+          numberTitle: '破译密码', numberCardCopy: '密码四位数，可重复', colorTitle: '颜色推理',
+          colorCardCopy: '根据提示猜颜色顺序，不可重复', playNow: '开始玩', footer: 'By Lila Chen · 吉',
+          memoryTitle: '卡牌记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', colorFindTitle: '找不同',
           colorFindCardCopy: '找出16个色块中唯一不同的颜色', slideTitle: '数字滑块', slideCardCopy: '移动方块，把数字从小到大排序',
-          colorSlideTitle: '解救色块', colorSlideCardCopy: '把所有的色块推出场地即可',
+          colorSlideTitle: '解救色块', colorSlideCardCopy: '移开挡块，把红色色块推出右侧即可',
           gomokuTitle: '五子棋', gomokuCardCopy: '先将五颗棋子连成一线（横、竖或斜）的一方获胜',
-          stroopTitle: '颜色挑战', stroopCardCopy: '请选择字的颜色，不要选字的意思',
+          stroopTitle: '颜色炸弹', stroopCardCopy: '选择字的颜色，不选字的意思',
           allGames: '所有游戏', restart: '重新开始', speedSubtitle: '依次点击 1 到 25，时间越短越好',
-          numberSubtitle: '密码始终四位数；每 8 关，已知提示会更难', colorSubtitle: '始终猜四格；每 8 关增加一种可选颜色',
-          memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', colorFindSubtitle: '找出4×4方格里唯一不同的色块',
+          numberSubtitle: '密码四位数，可重复', colorSubtitle: '根据提示猜颜色顺序，不可重复',
+          memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', colorFindSubtitle: '找出16个色块中唯一不同的颜色',
           slideSubtitle: '移动方块，把数字从小到大排序',
-          colorSlideSubtitle: '把所有的色块推出场地即可',
-          colorSlideReadyTitle: '准备好了吗？', colorSlideReadyIntro: '把所有的色块推出场地即可',
-          colorSlideInstructions: '沿长边滑动色块，按箭头方向推出边界；红色块要连续用力推出三次', colorSlideMoveLabel: '推动次数',
-          colorSlideStatus: '已解救 {escaped} / {total} 块色块', colorSlideRedBounce: '红色块反弹了，还要再用力 {n} 次',
-          colorSlideSolvedTitle: '全部色块解救成功！', colorSlideResultLevel: '第 {n} 关完成',
-          colorSlideBoardAria: '解救色块棋盘', colorSlideBlockAria: '{color}色块，推出方向{direction}', colorSlideTargetAria: '红色块，推出方向{direction}',
+          colorSlideSubtitle: '移开挡块，把红色色块推出右侧即可',
+          colorSlideReadyTitle: '准备好了吗？', colorSlideReadyIntro: '移开挡块，把红色色块推出右侧即可',
+          colorSlideInstructions: '其他色块只能在棋盘内移动；移开挡块，再连续用力推出红块三次', colorSlideMoveLabel: '推动次数',
+          colorSlideStatus: '移开挡块，把红色色块推出右侧即可', colorSlideRedBounce: '红色块反弹了，还要再用力 {n} 次',
+          colorSlideSolvedTitle: '红色色块成功出场！', colorSlideResultLevel: '第 {n} 关完成',
+          colorSlideBoardAria: '解救红色色块棋盘', colorSlideBlockAria: '{color}色块，只能在棋盘范围内移动', colorSlideTargetAria: '红色块，推出方向{direction}',
           colorSlideColors: ['豆沙红', '杏橙', '芥末黄', '草绿', '雾霾蓝', '灰紫', '粉色', '青绿', '橄榄绿', '焦糖棕', '鼠尾草绿', '奶咖色', '烟灰棕', '灰青色', '土黄色', '雾蓝色'],
           colorSlideDirections: { left: '向左', right: '向右', top: '向上', bottom: '向下' },
           gomokuSubtitle: '先将五颗棋子连成一线（横、竖或斜）的一方获胜', choosePieceColor: '棋子颜色',
@@ -878,9 +885,9 @@
           gomokuYouWin: '你赢了！五子连成一线', gomokuComputerWins: '电脑赢了，这一局下得不错', gomokuDraw: '平局！棋盘下满了',
           gomokuMoves: '已下 {n} 子', gomokuBoardAria: '五子棋 15 乘 15 棋盘', gomokuEmptyCell: '第 {row} 行第 {col} 列，空位',
           gomokuPlayerCell: '第 {row} 行第 {col} 列，你的棋子', gomokuComputerCell: '第 {row} 行第 {col} 列，电脑的棋子',
-          stroopSubtitle: '每五关增加一种颜色；每关十题',
-          stroopInstruction: '选择字的颜色，不要选字的意思', stroopReadyTitle: '准备好了吗？',
-          stroopStartIntro: '请选择字的颜色，不要选字的意思', questionNumber: '第 {n} / 10 题',
+          stroopSubtitle: '选择字的颜色，不选字的意思',
+          stroopInstruction: '选择字的颜色，不选字的意思', stroopReadyTitle: '准备好了吗？',
+          stroopStartIntro: '选择字的颜色，不选字的意思', questionNumber: '第 {n} / 10 题',
           correctShort: '答对', wrongShort: '答错', roundComplete: '本关完成！', roundResult: '第 {n} 关成绩',
           correctCount: '答对', wrongCount: '答错', totalTime: '用时', replayLevel: '再玩本关', nextLevel: '下一关',
           stroopOptionsAria: '选择字色选项',
@@ -895,21 +902,21 @@
           slideReady: '点击空格旁边的数字即可移动', slideSolved: '排好了！马上进入下一关',
           slideMoves: '移动 {n} 次', slideBoardSize: '棋盘 {n} × {n}', slideMovesLabel: '移动次数', slideBoardLabel: '棋盘',
           size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
-          numberRule: '数字可重复或以 0 开头；每 8 关提示少一个对的，最多降至 0', colorRule: '每种颜色只能用一次；每 8 关增加一种选择',
+          numberRule: '数字可重复或以 0 开头；每 8 关提示少一个对的，最多降至 0', colorRule: '',
           nextNumber: '下一个', speedReadyTitle: '准备好了吗？', speedStartIntro: '点击开始后计时，依次点击 1 到 25', startButton: '开始',
           speedReady: '', speedWrong: '找的是 {n}，再试试看',
           speedGood: '很好！继续找 {n}', speedFinal: '最后一个啦，加油！', speedDone: '太棒了！这一局完成啦', speedCompleteTitle: '本轮完成',
           speedPilot: '飞行员级别!!', speedExpert: '高手!!', speedEncourage: '继续加油!!', speedPractice: '需要强化哦!!',
           playAgain: '再来一局', currentTime: '本局用时', bestTime: '最快纪录', knownClue: '已知提示',
-          clueCountNote: '这组猜测有几个对了', submitGuess: '提交猜测', guessHistory: '猜测记录', yourGuesses: '你的每次尝试',
-          initialHelp: '先看这组提示，然后开始猜', enterMore: '还差 {n} 位', readySubmit: '数字齐了，提交看看吧！',
-          afterGuess: '记住结果，再试一组数字', solvedNext: '猜中了！准备进入下一关',
+          clueCountNote: '', submitGuess: '提交猜测', guessHistory: '猜测记录', yourGuesses: '正确个数',
+          initialHelp: '根据已知提示开始猜', enterMore: '还差 {n} 位', readySubmit: '数字齐了，提交看看吧！',
+          afterGuess: '', solvedNext: '猜中了！准备进入下一关',
           solvedMax: '太厉害了！你破解了最高难度', level: '第 {n} 关', guesses: '已猜 {n} 次',
           correct: '有 {n} 个对了', duplicateColor: '这个颜色已经选过啦，从第 {n} 格重新选', colorNames: ['豆沙红', '杏橙', '芥末黄', '草绿', '雾霾蓝', '灰紫', '玫粉', '青绿', '橄榄绿', '焦糖棕'],
           lengthName: ['四位', '五位', '六位', '七位', '八位', '九位', '十位'], passwordLength: '{n}密码',
           noHistory: '提交你的第一组猜测吧', speedAria: '1 到 25 的打乱数字', slotAria: '当前输入',
           languageAria: '语言', gamesAria: '小游戏', bestTimesAria: '最佳成绩', levelProgressAria: '关卡进度',
-          memoryStatsAria: '颜色记忆成绩', slideStatsAria: '数字滑块成绩',
+          memoryStatsAria: '卡牌记忆成绩', slideStatsAria: '数字滑块成绩', recordFewestMoves: '累计最少步数',
           digits: '数字', colors: '颜色', numberAria: '数字 {n}', doneAria: '数字 {n}，已完成'
         },
         en: {
@@ -921,23 +928,23 @@
           privateStats: 'Private site stats', onlineNow: 'Online now', totalVisits: 'Total visits', registeredPlayers: 'Registered players',
           schulteLeaderboard: 'Schulte Grid leaderboard', leaderboardEmpty: 'No scores yet',
           homeCopy: 'Ten minutes a day, a lighter mind', speedTitle: 'Schulte Grid', speedCardCopy: 'Tap 1 to 25 in order as fast as you can',
-          numberTitle: 'Code Breaker', numberCardCopy: 'The code is always four digits and may repeat', colorTitle: 'Color Logic',
-          colorCardCopy: 'Arrange the colors with no repeats', playNow: 'Play now', footer: 'By Lila Chen · 吉',
-          memoryTitle: 'Color Memory', memoryCardCopy: 'Flip the cards and find matching colors', colorFindTitle: 'Color Odd One Out',
+          numberTitle: 'Code Breaker', numberCardCopy: 'Four digits, repeats allowed', colorTitle: 'Color Logic',
+          colorCardCopy: 'Guess the color order from the clues; no repeats', playNow: 'Play now', footer: 'By Lila Chen · 吉',
+          memoryTitle: 'Card Memory', memoryCardCopy: 'Flip the cards and find matching colors', colorFindTitle: 'Find the Difference',
           colorFindCardCopy: 'Find the one different color among 16 blocks', slideTitle: 'Number Slide', slideCardCopy: 'Move the tiles to arrange the numbers from smallest to largest',
-          colorSlideTitle: 'Rescue the Blocks', colorSlideCardCopy: 'Push every block out of the board',
+          colorSlideTitle: 'Rescue the Blocks', colorSlideCardCopy: 'Move blockers and slide the red block out to the right',
           gomokuTitle: 'Gomoku', gomokuCardCopy: 'Connect five stones in a row, column, or diagonal to win',
-          stroopTitle: 'Color Challenge', stroopCardCopy: 'Choose the ink color, not what the word means',
+          stroopTitle: 'Color Bomb', stroopCardCopy: 'Choose the ink color, not the word’s meaning',
           allGames: 'All games', restart: 'Start over', speedSubtitle: 'Tap 1 to 25 in order as fast as you can',
-          numberSubtitle: 'The code stays four digits; the clue gets harder every 8 levels', colorSubtitle: 'The code stays four slots; every 8 levels adds one color option',
-          memorySubtitle: 'Remember where each color is and find every matching pair', colorFindSubtitle: 'Find the one different block in the 4 × 4 grid',
+          numberSubtitle: 'Four digits, repeats allowed', colorSubtitle: 'Guess the color order from the clues; no repeats',
+          memorySubtitle: 'Remember where each color is and find every matching pair', colorFindSubtitle: 'Find the one different color among 16 blocks',
           slideSubtitle: 'Move the tiles to arrange the numbers from smallest to largest',
-          colorSlideSubtitle: 'Push every block out of the board',
-          colorSlideReadyTitle: 'Ready?', colorSlideReadyIntro: 'Push every block out of the board',
-          colorSlideInstructions: 'Slide blocks along their long side and push them out in the arrow direction; the red block takes three strong pushes', colorSlideMoveLabel: 'Moves',
-          colorSlideStatus: 'Blocks rescued: {escaped} / {total}', colorSlideRedBounce: 'The red block bounced back; push hard {n} more times',
-          colorSlideSolvedTitle: 'Every block is rescued!', colorSlideResultLevel: 'Level {n} complete',
-          colorSlideBoardAria: 'Rescue the blocks board', colorSlideBlockAria: '{color} block, exit direction {direction}', colorSlideTargetAria: 'Red block, exit direction {direction}',
+          colorSlideSubtitle: 'Move blockers and slide the red block out to the right',
+          colorSlideReadyTitle: 'Ready?', colorSlideReadyIntro: 'Move blockers and slide the red block out to the right',
+          colorSlideInstructions: 'Other blocks stay inside the board; clear a path, then push the red block out three times', colorSlideMoveLabel: 'Moves',
+          colorSlideStatus: 'Clear the way and slide the red block out to the right', colorSlideRedBounce: 'The red block bounced back; push hard {n} more times',
+          colorSlideSolvedTitle: 'The red block is out!', colorSlideResultLevel: 'Level {n} complete',
+          colorSlideBoardAria: 'Red block rescue board', colorSlideBlockAria: '{color} block; it can move only inside the board', colorSlideTargetAria: 'Red block, exit direction {direction}',
           colorSlideColors: ['Dusty rose', 'Apricot', 'Mustard', 'Sage green', 'Hazy blue', 'Mauve', 'Pink', 'Teal', 'Olive', 'Caramel', 'Sage', 'Latte', 'Taupe', 'Blue gray', 'Ochre', 'Mist blue'],
           colorSlideDirections: { left: 'left', right: 'right', top: 'up', bottom: 'down' },
           gomokuSubtitle: 'Connect five stones in a row, column, or diagonal to win', choosePieceColor: 'Stone color',
@@ -951,9 +958,9 @@
           gomokuYouWin: 'You win! Five in a row', gomokuComputerWins: 'The computer wins, but that was a nice game', gomokuDraw: 'It’s a draw; the board is full',
           gomokuMoves: '{n} stones played', gomokuBoardAria: '15 by 15 Gomoku board', gomokuEmptyCell: 'Row {row}, column {col}, empty',
           gomokuPlayerCell: 'Row {row}, column {col}, your stone', gomokuComputerCell: 'Row {row}, column {col}, computer stone',
-          stroopSubtitle: 'Add one color every five levels; ten questions per level',
-          stroopInstruction: 'Choose the ink color, not what the letter means', stroopReadyTitle: 'Are you ready?',
-          stroopStartIntro: 'Choose the ink color, not what the word means', questionNumber: 'Question {n} / 10',
+          stroopSubtitle: 'Choose the ink color, not the word’s meaning',
+          stroopInstruction: 'Choose the ink color, not the word’s meaning', stroopReadyTitle: 'Are you ready?',
+          stroopStartIntro: 'Choose the ink color, not the word’s meaning', questionNumber: 'Question {n} / 10',
           correctShort: 'Right', wrongShort: 'Wrong', roundComplete: 'Level complete!', roundResult: 'Level {n} results',
           correctCount: 'Correct', wrongCount: 'Wrong', totalTime: 'Time', replayLevel: 'Replay level', nextLevel: 'Next level',
           stroopOptionsAria: 'Choose the ink color',
@@ -968,21 +975,21 @@
           slideReady: 'Click a number next to the empty space to move it', slideSolved: 'Solved! Next level coming up',
           slideMoves: '{n} moves', slideBoardSize: 'Board: {n} × {n}', slideMovesLabel: 'Moves', slideBoardLabel: 'Board',
           size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
-          numberRule: 'Digits may repeat or start with 0; every 8 levels the clue gives one fewer match, down to zero', colorRule: 'Use each color once; one option is added every 8 levels',
+          numberRule: 'Digits may repeat or start with 0; every 8 levels the clue gives one fewer match, down to zero', colorRule: '',
           nextNumber: 'Next', speedReadyTitle: 'Ready?', speedStartIntro: 'The timer starts when you tap Start, then tap 1 to 25 in order', startButton: 'Start',
           speedReady: '', speedWrong: 'Find {n} next, try again!',
           speedGood: 'Nice! Now find {n}', speedFinal: 'One more to go!', speedDone: 'Amazing! You finished the round', speedCompleteTitle: 'Round complete',
           speedPilot: 'Pilot level!!', speedExpert: 'Expert!!', speedEncourage: 'Keep it up!!', speedPractice: 'More practice needed!!',
           playAgain: 'Play again', currentTime: 'This round', bestTime: 'Best time', knownClue: 'Starting clue',
-          clueCountNote: 'correct in this guess', submitGuess: 'Submit guess', guessHistory: 'Guess history', yourGuesses: 'Your attempts',
-          initialHelp: 'Start with the clue, then make a guess', enterMore: '{n} more to go', readySubmit: 'All set, submit your guess!',
-          afterGuess: 'Keep the result in mind and try again', solvedNext: 'Cracked! On to the next level',
+          clueCountNote: '', submitGuess: 'Submit guess', guessHistory: 'Guess history', yourGuesses: 'Correct count',
+          initialHelp: 'Use the clue to make a guess', enterMore: '{n} more to go', readySubmit: 'All set, submit your guess!',
+          afterGuess: '', solvedNext: 'Cracked! On to the next level',
           solvedMax: 'Incredible! You cracked the hardest level', solvedMaxShort: 'You cracked the 10-slot code!',
           level: 'Level {n}', guesses: 'Guesses: {n}', correct: '{n} correct', duplicateColor: 'That color is already used; pick again from slot {n}', colorNames: ['Dusty rose', 'Apricot', 'Mustard', 'Grass green', 'Slate blue', 'Muted violet', 'Blush pink', 'Teal', 'Olive', 'Taupe'],
           lengthName: ['4-digit', '5-digit', '6-digit', '7-digit', '8-digit', '9-digit', '10-digit'], passwordLength: '{n} code',
           noHistory: 'Submit your first guess to get started', speedAria: 'Shuffled numbers from 1 to 25', slotAria: 'Current guess',
           languageAria: 'Language', gamesAria: 'Games', bestTimesAria: 'Best times', levelProgressAria: 'Level progress',
-          memoryStatsAria: 'Color memory stats', slideStatsAria: 'Number sliding puzzle stats',
+          memoryStatsAria: 'Card memory stats', slideStatsAria: 'Number sliding puzzle stats', recordFewestMoves: 'Fewest moves',
           digits: 'digits', colors: 'colors', numberAria: 'Number {n}', doneAria: 'Number {n}, completed'
         }
       };
@@ -1041,6 +1048,20 @@
         try { localStorage.setItem(progressStorageKey, JSON.stringify({ levels: savedGameLevels })); } catch (_) {}
         if (supabaseClient && authUser) void syncPlayerProgress();
       }
+      function recordKey(game, metric) {
+        return `number-playground-record-${game}-${metric}${authUser ? '-user-' + authUser.id : ''}`;
+      }
+      function readRecord(game, metric) {
+        try { const value = Number(localStorage.getItem(recordKey(game, metric))); return Number.isFinite(value) && value > 0 ? value : 0; } catch (_) { return 0; }
+      }
+      function saveLowerRecord(game, metric, value) {
+        const next = Number(value);
+        if (!Number.isFinite(next) || next <= 0) return readRecord(game, metric);
+        const current = readRecord(game, metric);
+        const best = !current || next < current ? next : current;
+        if (best !== current) { try { localStorage.setItem(recordKey(game, metric), String(best)); } catch (_) {} }
+        return best;
+      }
       let speedNext = 1;
       let speedStart = 0;
       let speedTick = 0;
@@ -1052,9 +1073,9 @@
       try { bestMs = Number(localStorage.getItem(bestStorageKey)) || 0; } catch (_) {}
       const password = { mode: '', level: 1, length: 4, target: [], guess: [], history: [], locked: false, jumpBackIndex: -1, helpKey: 'initialHelp', helpParams: {}, nextTimer: 0 };
       const memory = { level: getSavedLevel('memory'), pairs: 6, cards: [], matched: new Set(), open: [], flips: 0, turns: 0, locked: false, startedAt: 0, elapsed: 0, clock: 0, pendingTimer: 0, nextTimer: 0, statusKey: 'memoryReady' };
-      const colorFind = { level: getSavedLevel('colorfind'), tiles: [], oddIndex: -1, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, mistakes: 0, correct: 0, finished: false, statusKey: 'colorFindInstruction' };
+      const colorFind = { level: getSavedLevel('colorfind'), tiles: [], oddIndex: -1, nextTimer: 0, mistakes: 0, correct: 0, finished: false, statusKey: 'colorFindInstruction' };
       const slide = { level: getSavedLevel('slide'), size: 3, tiles: [], moves: 0, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, finished: false, statusKey: 'slideReady' };
-      const colorSlide = { level: getSavedLevel('colorslide'), blocks: [], puzzle: [], moves: 0, escaped: 0, redPushes: 0, startedAt: 0, elapsed: 0, clock: 0, started: false, finished: false, drag: null };
+      const colorSlide = { level: getSavedLevel('colorslide'), blocks: [], puzzle: [], moves: 0, escaped: 0, redPushes: 0, started: false, finished: false, drag: null };
       let savedGomokuProfile = { skill: 'beginner', beginnerGames: 0, skilledGames: 0 };
       try {
         const saved = JSON.parse(localStorage.getItem(gomokuStorageKey) || 'null');
@@ -1235,18 +1256,10 @@
         if (slide.clock) window.clearInterval(slide.clock);
         slide.clock = 0;
       }
-      function stopColorSlideClock() {
-        if (colorSlide.clock) window.clearInterval(colorSlide.clock);
-        colorSlide.clock = 0;
-      }
       function memoryElapsed() { return memory.startedAt ? performance.now() - memory.startedAt : memory.elapsed; }
-      function colorFindElapsed() { return colorFind.startedAt ? performance.now() - colorFind.startedAt : colorFind.elapsed; }
       function slideElapsed() { return slide.startedAt ? performance.now() - slide.startedAt : slide.elapsed; }
-      function colorSlideElapsed() { return colorSlide.startedAt ? performance.now() - colorSlide.startedAt : colorSlide.elapsed; }
       function updateMemoryClock() { if (activeGame === 'memory') $('memory-clock').textContent = formatTime(memoryElapsed()); }
-      function updateColorFindClock() { if (activeGame === 'colorfind' && !colorFind.finished) $('colorfind-clock').textContent = formatTime(colorFindElapsed()); }
       function updateSlideClock() { if (activeGame === 'slide') $('slide-clock').textContent = formatTime(slideElapsed()); }
-      function updateColorSlideClock() { if (activeGame === 'colorslide' && !colorSlide.finished) $('color-slide-clock').textContent = formatTime(colorSlideElapsed()); }
       function getMemoryPairs(level = memory.level) { return 6 + 2 * Math.floor(level / 9); }
       function getMemoryColumns() { return 4; }
       function getMemoryColor(index) {
@@ -1300,6 +1313,10 @@
         $('memory-turns').textContent = t('memoryTurns', { n: memory.turns });
         $('memory-flips').textContent = String(memory.flips);
         $('memory-matched').textContent = `${memory.matched.size} / ${memory.pairs}`;
+        const memoryBestMoves = readRecord('memory', 'moves');
+        const memoryBestTime = readRecord('memory', 'time');
+        $('memory-best-moves').textContent = memoryBestMoves ? String(memoryBestMoves) : '—';
+        $('memory-best-time').textContent = memoryBestTime ? formatTime(memoryBestTime) : '—';
         const board = $('memory-board');
         board.style.setProperty('--memory-columns', getMemoryColumns(memory.pairs));
         board.style.setProperty('--memory-columns-mobile', Math.min(getMemoryColumns(memory.pairs), 5));
@@ -1347,6 +1364,8 @@
             memory.elapsed = memoryElapsed();
             memory.startedAt = 0;
             stopMemoryClock();
+            saveLowerRecord('memory', 'moves', memory.turns);
+            saveLowerRecord('memory', 'time', Math.round(memory.elapsed));
             memory.statusKey = 'memoryWin';
             saveGameLevel('memory', memory.level + 1);
             $('memory-status').textContent = t(memory.statusKey);
@@ -1367,10 +1386,6 @@
         }
       }
 
-      function stopColorFindClock() {
-        if (colorFind.clock) window.clearInterval(colorFind.clock);
-        colorFind.clock = 0;
-      }
       function colorFindHsl(hex) {
         const value = hex.replace('#', '');
         const r = parseInt(value.slice(0, 2), 16) / 255;
@@ -1410,7 +1425,6 @@
       }
       function beginColorFindLevel() {
         window.clearTimeout(colorFind.nextTimer);
-        stopColorFindClock();
         colorFind.level = getSavedLevel('colorfind');
         const [hue, saturation, originalLightness] = colorFindHsl(palette[Math.floor(Math.random() * palette.length)].hex);
         const baseLightness = Math.max(32, Math.min(68, originalLightness));
@@ -1422,14 +1436,11 @@
         const oddColor = `hsl(${hue.toFixed(1)} ${saturation.toFixed(1)}% ${oddLightness.toFixed(1)}%)`;
         colorFind.tiles = shuffle(Array.from({ length: 16 }, (_, index) => ({ color: index === 0 ? oddColor : baseColor, odd: index === 0 })));
         colorFind.oddIndex = colorFind.tiles.findIndex((tile) => tile.odd);
-        colorFind.startedAt = performance.now(); colorFind.elapsed = 0;
         colorFind.finished = false; colorFind.statusKey = 'colorFindInstruction';
-        colorFind.clock = window.setInterval(updateColorFindClock, 100);
         renderColorFind();
       }
       function renderColorFind() {
         $('colorfind-level').textContent = t('level', { n: colorFind.level });
-        $('colorfind-clock').textContent = formatTime(colorFindElapsed());
         $('colorfind-mistakes').textContent = t('colorFindMistakes', { n: colorFind.mistakes });
         $('colorfind-correct').textContent = String(colorFind.correct);
         $('colorfind-difficulty').textContent = colorFindDifficultyName();
@@ -1459,9 +1470,7 @@
           $('colorfind-status').textContent = t(colorFind.statusKey);
           return;
         }
-        colorFind.elapsed = colorFindElapsed(); colorFind.startedAt = 0;
         colorFind.finished = true; colorFind.correct++; colorFind.statusKey = 'colorFindRight';
-        stopColorFindClock();
         saveGameLevel('colorfind', colorFind.level + 1);
         renderColorFind();
         colorFind.nextTimer = window.setTimeout(beginColorFindLevel, 800);
@@ -1518,6 +1527,10 @@
         $('slide-moves').textContent = t('slideMoves', { n: slide.moves });
         $('slide-move-stat').textContent = String(slide.moves);
         $('slide-board-stat').textContent = t(`size${slide.size}`);
+        const slideBestMoves = readRecord('slide', 'moves');
+        const slideBestTime = readRecord('slide', 'time');
+        $('slide-best-moves').textContent = slideBestMoves ? String(slideBestMoves) : '—';
+        $('slide-best-time').textContent = slideBestTime ? formatTime(slideBestTime) : '—';
         const board = $('slide-board');
         board.style.setProperty('--slide-size', slide.size);
         board.setAttribute('aria-label', t('slideBoardSize', { n: slide.size }));
@@ -1546,6 +1559,8 @@
         slide.moves++;
         if (slideSolved()) {
           slide.elapsed = slideElapsed(); slide.startedAt = 0; stopSlideClock();
+          saveLowerRecord('slide', 'moves', slide.moves);
+          saveLowerRecord('slide', 'time', Math.round(slide.elapsed));
           slide.finished = true; slide.statusKey = 'slideSolved';
           saveGameLevel('slide', slide.level + 1);
           renderSlide();
@@ -1629,56 +1644,33 @@
         return shuffle(options);
       }
       function makeColorSlidePuzzle(level) {
-        const desiredTotal = Math.min(18, 14 + Math.floor((level - 1) / 4));
-        let best = [];
-        for (let attempt = 0; attempt < 36; attempt++) {
-          const blocks = [{ id: 'target', orientation: 'h', length: 2, x: 2, y: 2, exitDir: 1, color: '#b98284', colorIndex: 0, target: true }];
-          while (blocks.length < desiredTotal) {
-            const options = colorSlidePlacementOptions(blocks, level);
-            if (!options.length) break;
-            const block = options[0];
-            const colorIndex = (blocks.length - 1) % colorSlideCarPalette.length;
-            blocks.push({ ...block, id: 'block-' + blocks.length, colorIndex, color: colorSlideCarPalette[colorIndex], target: false });
-          }
-          if (blocks.length > best.length) best = blocks;
-          if (blocks.length === desiredTotal) break;
-        }
-        const blocks = best.map((block) => ({ ...block }));
-        let previous = null;
-        const shuffleSteps = 72 + Math.min(160, level * 8);
-        for (let step = 0; step < shuffleSteps; step++) {
-          let choices = [];
-          for (const block of blocks) {
-            const bounds = colorSlideMoveBounds(block, blocks);
-            for (let delta = -bounds.negative; delta <= bounds.positive; delta++) {
-              if (!delta) continue;
-              if (block.target && block.x + delta >= 4) continue;
-              if (previous && previous.id === block.id && previous.delta === -delta) continue;
-              choices.push({ id: block.id, delta });
-            }
-          }
-          if (!choices.length) {
-            for (const block of blocks) {
-              const bounds = colorSlideMoveBounds(block, blocks);
-              for (let delta = -bounds.negative; delta <= bounds.positive; delta++) {
-                if (delta && (!block.target || block.x + delta < 4)) choices.push({ id: block.id, delta });
-              }
-            }
-          }
-          if (!choices.length) break;
-          const move = choices[Math.floor(Math.random() * choices.length)];
-          const block = blocks.find((item) => item.id === move.id);
-          if (block.orientation === 'h') block.x += move.delta; else block.y += move.delta;
-          previous = move;
-        }
-        return blocks.map((block) => ({ ...block }));
+        const blockers = [2, 3, 4, 5].map((x) => ({ orientation: 'v', length: 2, x, y: 1, exitDir: -1 }));
+        const gates = [
+          { orientation: 'h', length: 2, x: 2, y: 0, exitDir: -1 },
+          { orientation: 'h', length: 2, x: 4, y: 0, exitDir: 1 },
+          { orientation: 'h', length: 2, x: 0, y: 3, exitDir: -1 },
+          { orientation: 'h', length: 2, x: 4, y: 3, exitDir: -1 }
+        ];
+        const filler = [
+          { orientation: 'v', length: 2, x: 0, y: 4, exitDir: -1 },
+          { orientation: 'v', length: 2, x: 1, y: 4, exitDir: -1 }
+        ];
+        const extraCount = Math.min(filler.length, 1 + Math.floor((level - 1) / 6));
+        const layout = [
+          { id: 'target', orientation: 'h', length: 2, x: 0, y: 2, exitDir: 1, color: '#b98284', colorIndex: 0, target: true },
+          ...blockers, ...gates, ...filler.slice(0, extraCount)
+        ];
+        return layout.map((block, index) => {
+          if (block.target) return block;
+          const colorIndex = (index - 1) % colorSlideCarPalette.length;
+          return { ...block, id: 'block-' + index, colorIndex, color: colorSlideCarPalette[colorIndex], target: false };
+        });
       }
       function beginColorSlideLevel(makeNewPuzzle = true, startNow = false) {
-        stopColorSlideClock();
         if (makeNewPuzzle || !colorSlide.puzzle.length) colorSlide.puzzle = makeColorSlidePuzzle(colorSlide.level);
         colorSlide.blocks = colorSlide.puzzle.map((block) => ({ ...block }));
         colorSlide.moves = 0; colorSlide.escaped = 0; colorSlide.redPushes = 0; colorSlide.redBounceNotice = 0;
-        colorSlide.animating = false; colorSlide.startedAt = 0; colorSlide.elapsed = 0;
+        colorSlide.animating = false;
         colorSlide.started = startNow; colorSlide.finished = false; colorSlide.drag = null;
         renderColorSlide();
       }
@@ -1696,16 +1688,14 @@
         $('color-slide-play').hidden = !colorSlide.started;
         $('color-slide-results').hidden = !colorSlide.finished;
         $('color-slide-level').textContent = t('level', { n: colorSlide.level });
-        $('color-slide-clock').textContent = formatTime(colorSlideElapsed());
         $('color-slide-moves').textContent = String(colorSlide.moves);
         const status = colorSlide.redBounceNotice > 0
           ? t('colorSlideRedBounce', { n: colorSlide.redBounceNotice })
-          : t('colorSlideStatus', { escaped: colorSlide.escaped, total: colorSlide.puzzle.length });
+          : t('colorSlideStatus');
         $('color-slide-status').textContent = status;
         if (colorSlide.finished) {
           $('color-slide-result-level').textContent = t('colorSlideResultLevel', { n: colorSlide.level });
           $('color-slide-result-moves').textContent = String(colorSlide.moves);
-          $('color-slide-result-time').textContent = formatTime(colorSlide.elapsed);
         }
         const board = $('color-slide-board');
         const focusedBlockId = document.activeElement?.classList.contains('color-slide-block') ? document.activeElement.dataset.blockId : '';
@@ -1722,9 +1712,9 @@
           button.dataset.blockId = block.id;
           button.style.backgroundColor = block.color;
           const directionName = copy[language].colorSlideDirections[direction];
-          button.setAttribute('aria-label', block.target ? t('colorSlideTargetAria', { direction: directionName }) : t('colorSlideBlockAria', { color: word('colorSlideColors', block.colorIndex), direction: directionName }));
+          button.setAttribute('aria-label', block.target ? t('colorSlideTargetAria', { direction: directionName }) : t('colorSlideBlockAria', { color: word('colorSlideColors', block.colorIndex) }));
           const mark = document.createElement('span'); mark.className = 'color-slide-arrow'; mark.setAttribute('aria-hidden', 'true');
-          mark.textContent = direction === 'left' ? '←' : direction === 'right' ? '→' : direction === 'top' ? '↑' : '↓'; button.append(mark);
+          mark.textContent = block.target ? '→' : block.orientation === 'h' ? '↔' : '↕'; button.append(mark);
           button.addEventListener('pointerdown', (event) => startColorSlideDrag(event, block.id));
           button.addEventListener('pointermove', moveColorSlideDrag);
           button.addEventListener('pointerup', finishColorSlideDrag);
@@ -1733,11 +1723,6 @@
           board.append(button);
           if (block.id === focusedBlockId) button.focus({ preventScroll: true });
         });
-      }
-      function startColorSlideClock() {
-        if (colorSlide.startedAt) return;
-        colorSlide.startedAt = performance.now();
-        colorSlide.clock = window.setInterval(updateColorSlideClock, 100);
       }
       function moveColorSlideBlock(id, delta) {
         if (!colorSlide.started || colorSlide.finished || colorSlide.animating || !delta) return;
@@ -1750,14 +1735,12 @@
           const nextX = block.x + (block.orientation === 'h' ? delta : 0);
           const nextY = block.y + (block.orientation === 'v' ? delta : 0);
           if (!colorSlidePositionIsOpen(block, nextX, nextY)) return;
-          startColorSlideClock();
           block.x = nextX; block.y = nextY; colorSlide.moves += Math.abs(delta);
           renderColorSlide();
           return;
         }
         const canExit = direction < 0 ? bounds.exitNegative : bounds.exitPositive;
-        if (direction !== block.exitDir || !canExit) return;
-        startColorSlideClock();
+        if (!block.target || direction !== block.exitDir || !canExit) return;
         if (maxInside) {
           block.x += block.orientation === 'h' ? direction * maxInside : 0;
           block.y += block.orientation === 'v' ? direction * maxInside : 0;
@@ -1776,10 +1759,9 @@
         window.setTimeout(() => {
           const blockIndex = colorSlide.blocks.findIndex((item) => item.id === id);
           if (blockIndex !== -1) colorSlide.blocks.splice(blockIndex, 1);
-          colorSlide.escaped++;
+          colorSlide.escaped = 1;
           colorSlide.animating = false;
-          if (!colorSlide.blocks.length) {
-            colorSlide.elapsed = colorSlideElapsed(); colorSlide.startedAt = 0; stopColorSlideClock();
+          if (block.target) {
             colorSlide.finished = true; saveGameLevel('colorslide', colorSlide.level + 1);
             renderColorSlide(); $('color-slide-replay').focus();
           } else renderColorSlide();
@@ -2158,11 +2140,14 @@
         if (!stroop.started) return;
         $('stroop-level').textContent = t('level', { n: stroop.level });
         $('stroop-clock').textContent = formatTime(stroopElapsed());
+        const stroopBest = readRecord('stroop', 'time');
+        $('stroop-best-time').textContent = stroopBest ? formatTime(stroopBest) : '—';
         if (stroop.finished) {
           $('stroop-result-level').textContent = t('roundResult', { n: stroop.level });
           $('stroop-result-correct').textContent = String(stroop.correct);
           $('stroop-result-wrong').textContent = String(stroop.wrong);
           $('stroop-result-time').textContent = formatTime(stroop.elapsed);
+          $('stroop-result-best').textContent = stroopBest ? formatTime(stroopBest) : '—';
           return;
         }
         const question = stroop.questions[stroop.index];
@@ -2194,6 +2179,7 @@
         stroop.index++;
         if (stroop.index >= 10) {
           stroop.elapsed = stroopElapsed(); stroop.startedAt = 0; stroop.finished = true;
+          saveLowerRecord('stroop', 'time', Math.round(stroop.elapsed));
           stopStroopClock(); renderStroop();
         } else renderStroop();
       }
@@ -2255,7 +2241,7 @@
         password.jumpBackIndex = -1;
         password.history = [];
         password.locked = false;
-        password.helpKey = 'initialHelp'; password.helpParams = {};
+        password.helpKey = password.mode === 'color' ? '' : 'initialHelp'; password.helpParams = {};
         renderPassword();
       }
       function startPasswordGame(mode) {
@@ -2280,7 +2266,7 @@
         } else password.guess.pop();
         password.jumpBackIndex = -1;
         const count = passwordGuessCount();
-        setPasswordHelp(count ? 'enterMore' : 'initialHelp', { n: password.length - count });
+        setPasswordHelp(count ? 'enterMore' : password.mode === 'color' ? '' : 'initialHelp', { n: password.length - count });
         renderPassword();
       }
       function renderPassword() {
@@ -2296,7 +2282,8 @@
         const clueSequence = $('clue-sequence'); clueSequence.replaceChildren();
         password.clue.forEach((value) => addSequenceItem(clueSequence, value, mode));
         $('clue-result').textContent = correctText(password.clueCount);
-        $('rule-note').textContent = t(mode === 'number' ? 'numberRule' : 'colorRule');
+        $('rule-note').hidden = mode === 'color';
+        $('rule-note').textContent = mode === 'number' ? t('numberRule') : '';
         const slots = $('slots'); slots.style.setProperty('--code-length', password.length); slots.replaceChildren();
         for (let i = 0; i < password.length; i++) {
           const slot = document.createElement('span');
@@ -2383,8 +2370,8 @@
       function openGame(id) {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
-        window.clearTimeout(colorFind.nextTimer); stopColorFindClock();
-        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock();
+        window.clearTimeout(colorFind.nextTimer);
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock();
         window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0; stopStroopClock();
         activeGame = id;
         homeView.hidden = true; gameView.hidden = false;
@@ -2408,8 +2395,8 @@
       function goHome() {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
-        window.clearTimeout(colorFind.nextTimer); stopColorFindClock();
-        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock(); stopStroopClock();
+        window.clearTimeout(colorFind.nextTimer);
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock(); stopStroopClock();
         resetGomokuSetup(); activeGame = '';
         gameView.hidden = true; homeView.hidden = false;
         window.scrollTo({ top: 0, behavior: 'smooth' });

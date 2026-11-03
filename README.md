@@ -6,7 +6,7 @@ A bilingual collection of quick brain-training mini games, built as a single HTM
 
 Open `index.html` in a web browser. No build step or dependencies are required.
 
-The page includes Schulte Grid, Code Breaker, Color Logic, Color Memory, Color Odd One Out, Number Slide, Rescue the Blocks, Gomoku, and Color Challenge, with Chinese and English language options.
+The page includes Schulte Grid, Code Breaker, Color Logic, Card Memory, Find the Difference, Number Slide, Rescue the Blocks, Gomoku, and Color Bomb, with Chinese and English language options.
 
 ## Progress and accounts
 
