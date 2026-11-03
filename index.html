@@ -1,0 +1,1738 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf9f6">
+  <title>数字游乐场 · Number Playground</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #46504f;
+      --muted: #818785;
+      --line: #e4e2dc;
+      --paper: #fff;
+      --canvas: #faf9f6;
+      --violet: #879ba3;
+      --violet-dark: #6d828a;
+      --violet-pale: #eff2f0;
+      --coral: #b6938d;
+      --shadow: 0 14px 38px rgba(76, 79, 75, .06), 0 2px 8px rgba(76, 79, 75, .025);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 7% 0%, rgba(232, 237, 233, .62), transparent 28rem),
+        radial-gradient(ellipse at 100% 18%, rgba(241, 237, 231, .62), transparent 24rem),
+        var(--canvas);
+      color: var(--ink);
+      font-family: ui-rounded, "SF Pro Rounded", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      letter-spacing: .01em;
+    }
+    button { color: inherit; font: inherit; }
+    .page { width: min(1110px, calc(100% - 44px)); margin: 0 auto; padding: 29px 0 44px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 43px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; padding: 0; border: 0; background: transparent; font-weight: 800; font-size: 15px; letter-spacing: .02em; cursor: pointer; }
+    .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #d7e7e9; border-radius: 12px; color: #5e8994; background: #e6f0f1; box-shadow: 0 4px 10px rgba(92, 116, 120, .1); font-size: 18px; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .top-note { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #9aaf9f; box-shadow: 0 0 0 4px #edf1ec; }
+    .language { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid #d8e5e4; border-radius: 10px; background: rgba(255,255,255,.94); }
+    .language button { min-width: 34px; padding: 5px 7px; border: 0; border-radius: 7px; color: #858785; background: transparent; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .language button.active { color: #557b84; background: #e4eff0; }
+    .language button:hover:not(.active) { color: #557b84; background: #f2f6f4; }
+    .intro { max-width: 690px; margin: 0 auto 35px; text-align: center; }
+    .eyebrow { margin: 0 0 11px; color: var(--violet); font-size: 10px; font-weight: 850; letter-spacing: .17em; text-transform: none; }
+    h1 { margin: 0; font-size: clamp(34px, 5vw, 51px); line-height: 1.1; letter-spacing: -.05em; }
+    .intro-copy { margin: 13px auto 0; color: var(--muted); font-size: 14px; line-height: 1.75; }
+    .launch-grid { display: flex; width: min(100%, 760px); flex-direction: column; gap: 12px; margin: 0 auto; }
+    .launch-card {
+      display: grid; width: 100%; min-height: 96px; grid-template-columns: 54px minmax(0, 1fr) 34px; grid-template-rows: auto auto; align-items: center; column-gap: 15px;
+      padding: 17px 19px; border: 1px solid #e5e2dc; border-radius: 19px; background: #fff;
+      text-align: left; box-shadow: 0 5px 16px rgba(74, 79, 77, .045); cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .launch-card:hover { transform: translateY(-2px); border-color: #c2cbc5; box-shadow: 0 9px 22px rgba(74, 79, 77, .075); }
+    .launch-card:focus-visible, button:focus-visible { outline: 3px solid rgba(135, 155, 163, .33); outline-offset: 3px; }
+    .orb-area { display: grid; width: 50px; height: 50px; grid-column: 1; grid-row: 1 / span 2; place-items: center; border: 1px solid #e7eded; border-radius: 15px; background: #f1f5f5; }
+    .launch-card.speed .orb-area { border-color: #e7eadf; background: #f3f4ee; }
+    .launch-card.number .orb-area { border-color: #e4dbe9; background: #f2edf4; }
+    .launch-card.memory .orb-area { border-color: #ead9d4; background: #f7eeeb; }
+    .launch-card.slide .orb-area { border-color: #dce5e8; background: #edf3f4; }
+    .launch-card.gomoku .orb-area { border-color: #e6dfd0; background: #f4f0e6; }
+    .launch-card.stroop .orb-area { border-color: #e6dadd; background: #f7eff1; }
+    .game-symbol { color: #829da3; }
+    .grid-symbol { display: grid; grid-template-columns: repeat(2, 13px); gap: 3px; }
+    .grid-symbol i { width: 13px; height: 13px; border-radius: 3px; background: #a2b195; }
+    .grid-symbol i:nth-child(2), .grid-symbol i:nth-child(3) { background: #d8dfcf; }
+    .key-symbol { display: grid; grid-template-columns: repeat(2, 13px); gap: 3px; }
+    .key-symbol i { display: grid; width: 13px; height: 13px; place-items: center; border-radius: 3px; color: #8c789a; background: #fff; font-size: 7px; font-style: normal; font-weight: 800; }
+    .color-symbol { display: grid; grid-template-columns: repeat(2, 10px); gap: 5px; }
+    .color-symbol i { width: 10px; height: 10px; border: 1px solid #fff; border-radius: 50%; background: #c58d8c; box-shadow: 0 1px 3px rgba(77,78,73,.13); }
+    .color-symbol i:nth-child(2) { background: #d0a17c; }
+    .color-symbol i:nth-child(3) { background: #d1c080; }
+    .color-symbol i:nth-child(4) { background: #93aa7e; }
+    .memory-symbol { display: grid; grid-template-columns: repeat(2, 9px); gap: 4px; }
+    .memory-symbol i { width: 9px; height: 9px; border-radius: 3px; background: #c58d8c; }
+    .memory-symbol i:nth-child(2) { background: #d0a17c; }
+    .memory-symbol i:nth-child(3) { background: #d1c080; }
+    .memory-symbol i:nth-child(4) { background: #93aa7e; }
+    .slide-symbol { display: grid; grid-template-columns: repeat(3, 8px); gap: 2px; }
+    .slide-symbol i { display: grid; width: 8px; height: 8px; place-items: center; border-radius: 2px; color: #71868b; background: #d7e4e5; font-size: 5px; font-style: normal; font-weight: 850; }
+    .slide-symbol i:last-child { background: #fff; }
+    .gomoku-symbol { display: grid; grid-template-columns: repeat(3, 8px); gap: 3px; }
+    .gomoku-symbol i { width: 8px; height: 8px; border: 1px solid #c8bda8; border-radius: 50%; background: #f4f0e6; }
+    .gomoku-symbol i:nth-child(2), .gomoku-symbol i:nth-child(5), .gomoku-symbol i:nth-child(8) { background: #c58d8c; border-color: #c58d8c; }
+    .stroop-symbol { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #e6dcda; border-radius: 9px; color: #c58d8c; background: #fff; font-size: 18px; font-weight: 900; }
+    .launch-title { grid-column: 2; grid-row: 1; align-self: end; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.025em; }
+    .launch-copy { grid-column: 2; grid-row: 2; align-self: start; max-width: none; min-height: 0; margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .launch-bottom { display: grid; width: 32px; height: 32px; grid-column: 3; grid-row: 1 / span 2; place-items: center; justify-self: end; margin: 0; color: var(--violet-dark); }
+    .launch-arrow { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #e7eded; border-radius: 50%; color: #849da2; background: #f1f5f5; font-size: 15px; transition: transform .2s ease; }
+    .launch-card:hover .launch-arrow { transform: translateX(2px); }
+    .page-footer { margin-top: 28px; color: #9a9e99; text-align: center; font-size: 10px; }
+    .game-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 780px; margin: 0 auto 16px; }
+    .back-button, .restart-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; color: #677574; background: rgba(255,255,255,.96); font-size: 11px; font-weight: 750; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+    .back-button:hover, .restart-button:hover { transform: translateY(-1px); background: white; }
+    .game-heading { margin: 0 0 18px; text-align: center; }
+    .game-heading h1 { font-size: clamp(27px, 4vw, 37px); }
+    .game-heading p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .game-card { max-width: 780px; margin: 0 auto; padding: 24px; border: 1px solid #e5e2dc; border-radius: 23px; background: rgba(255,255,255,.97); box-shadow: var(--shadow); }
+    .challenge-ready { display: grid; min-height: 250px; align-content: center; justify-items: center; gap: 12px; padding: 28px 18px; border: 1px solid #e6e3dc; border-radius: 18px; background: linear-gradient(145deg, #faf9f6, #fff); text-align: center; }
+    .challenge-ready h2 { margin: 0; font-size: 20px; }
+    .challenge-ready p { max-width: 360px; margin: 0 0 5px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .challenge-ready .action { min-width: 126px; }
+    .speed-results-overlay { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(50,55,52,.38); backdrop-filter: blur(3px); }
+    .speed-results-dialog { width: min(100%, 390px); padding: 23px; border: 1px solid #e5e2dc; border-radius: 21px; background: #fff; box-shadow: 0 18px 55px rgba(39,46,43,.2); text-align: center; }
+    .speed-results-dialog h2 { margin: 0; font-size: 20px; }
+    .speed-result-tier { margin: 11px 0 16px; color: var(--violet-dark); font-size: 23px; font-weight: 900; }
+    .speed-result-stats { display: flex; gap: 8px; }
+    .speed-result-stat { flex: 1; padding: 10px 8px; border-radius: 12px; background: #f5f5f1; }
+    .speed-result-stat span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 9px; }
+    .speed-result-stat strong { font-size: 15px; font-variant-numeric: tabular-nums; }
+    .speed-result-actions { display: flex; justify-content: center; gap: 8px; margin-top: 17px; }
+    .board-info { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 2px 12px; }
+    .next-label { color: var(--muted); font-size: 11px; }
+    .next-number { display: inline-grid; place-items: center; min-width: 31px; height: 31px; margin-left: 5px; padding: 0 8px; border-radius: 10px; color: white; background: var(--violet); font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; vertical-align: middle; }
+    .timer { color: var(--ink); font-size: 20px; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; padding: 13px; border-radius: 17px; background: #f3f3ef; }
+    .tile { min-width: 0; aspect-ratio: 1; border: 1px solid #e3e1db; border-radius: 12px; color: #555f60; background: #fff; font-size: clamp(17px, 3vw, 23px); font-weight: 780; font-variant-numeric: tabular-nums; box-shadow: 0 2px 0 rgba(76,79,75,.03); cursor: pointer; transition: transform .13s ease, background .13s ease, color .13s ease, box-shadow .13s ease; }
+    .tile:hover:not(:disabled) { transform: translateY(-2px); border-color: #bbc8c6; box-shadow: 0 5px 12px rgba(76,91,89,.09); }
+    .tile:active:not(:disabled) { transform: translateY(1px) scale(.98); }
+    .tile.done { border-color: #cbd6d2; color: #718a83; background: #edf2ee; cursor: default; box-shadow: none; }
+    .tile.wrong { animation: nudge .25s ease; border-color: #d8bdb6; color: #a97770; background: #f7efec; }
+    @keyframes nudge { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+    .game-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 13px; }
+    .status { min-height: 18px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .action { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 39px; padding: 0 15px; border: 0; border-radius: 11px; color: #fff; background: var(--violet); font-size: 11px; font-weight: 780; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+    .action:hover:not(:disabled) { transform: translateY(-1px); background: var(--violet-dark); }
+    .action:disabled { cursor: default; }
+    .stats { display: flex; gap: 8px; margin-top: 14px; }
+    .stat { flex: 1; padding: 9px 11px; border-radius: 12px; background: #f5f5f1; }
+    .stat-label { display: block; margin-bottom: 3px; color: var(--muted); font-size: 9px; }
+    .stat-value { font-size: 13px; font-weight: 850; font-variant-numeric: tabular-nums; }
+    .password-card { max-width: 620px; }
+    .password-panel { padding: 20px; border: 1px solid #e6e3dc; border-radius: 18px; background: linear-gradient(145deg, #f8f8f5, #fff); }
+    .level-row, .clue-title, .history-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .level-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px; color: #6d828a; background: #eff2f0; font-size: 10px; font-weight: 850; }
+    .attempt-note, .clue-title, .history-head { color: var(--muted); font-size: 10px; }
+    .attempt-note b { color: var(--ink); }
+    .progress-dots { display: flex; gap: 5px; margin-top: 11px; }
+    .progress-dots i { display: block; width: 18px; height: 4px; border-radius: 4px; background: #e8e6e0; }
+    .progress-dots i.on { background: var(--violet); }
+    .clue-box { margin-top: 15px; padding: 11px 13px; border: 1px solid #e7e4dd; border-radius: 13px; background: rgba(255,255,255,.9); }
+    .clue-title { margin-bottom: 9px; }
+    .clue-content { display: flex; align-items: center; justify-content: center; gap: 11px; min-height: 34px; }
+    .sequence { display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .sequence-number { display: grid; width: 25px; height: 28px; place-items: center; border-radius: 7px; color: #5b6d70; background: #f1f2ee; font-size: 13px; font-weight: 850; font-variant-numeric: tabular-nums; }
+    .sequence-color { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; box-shadow: 0 1px 4px rgba(67,72,68,.16); }
+    .clue-result { color: var(--violet-dark); font-size: 11px; font-weight: 850; white-space: nowrap; }
+    .rule-note { margin: 9px 0 -7px; color: #858985; text-align: center; font-size: 9px; }
+    .slot-row { display: grid; grid-template-columns: repeat(var(--code-length, 4), minmax(0, 1fr)); gap: 7px; width: min(100%, 450px); margin: 19px auto 12px; }
+    .slot { display: grid; width: 100%; max-width: 48px; aspect-ratio: .86; place-items: center; justify-self: center; border: 1px solid #e3e1db; border-radius: 12px; color: var(--ink); background: rgba(255,255,255,.94); font-size: clamp(16px, 4vw, 23px); font-weight: 850; font-variant-numeric: tabular-nums; box-shadow: 0 3px 0 rgba(76,79,75,.03); }
+    .slot.empty { color: #c3c6c1; }
+    .slot.repick { border-color: var(--coral); background: #f7f0ed; box-shadow: 0 0 0 3px rgba(182,147,141,.18); animation: repick-pulse .8s ease-in-out infinite alternate; }
+    @keyframes repick-pulse { to { box-shadow: 0 0 0 5px rgba(182,147,141,.08); } }
+    .slot .sequence-color { width: 60%; height: auto; aspect-ratio: 1; }
+    .code-help { min-height: 17px; margin: 0; color: var(--muted); text-align: center; font-size: 10px; }
+    .code-help.good { color: #718a7d; font-weight: 750; }
+    .code-help.bad { color: #a97770; }
+    .keypad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin-top: 16px; }
+    .key { min-height: 38px; border: 1px solid #e4e2dc; border-radius: 10px; color: #556466; background: white; font-size: 14px; font-weight: 780; cursor: pointer; transition: .12s ease; }
+    .key:hover:not(:disabled) { transform: translateY(-1px); border-color: #c0cbc7; background: #f4f5f2; }
+    .key:disabled { opacity: .45; cursor: default; }
+    .color-keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 16px; }
+    .color-key { display: flex; min-height: 39px; align-items: center; justify-content: center; gap: 7px; border: 1px solid #e4e2dc; border-radius: 10px; color: #59696a; background: white; font-size: 10px; font-weight: 750; cursor: pointer; transition: .12s ease; }
+    .color-key:hover:not(:disabled) { transform: translateY(-1px); border-color: #c0cbc7; background: #f4f5f2; }
+    .color-key:disabled { opacity: .45; cursor: default; }
+    .color-chip { width: 17px; height: 17px; flex: none; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; box-shadow: 0 1px 4px rgba(67,72,68,.16); }
+    .code-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 9px; }
+    .code-actions .action { min-height: 40px; }
+    .edit-key { min-width: 45px; border: 1px solid var(--line); border-radius: 11px; color: #697a79; background: #fff; font-size: 14px; cursor: pointer; }
+    .edit-key:disabled { opacity: .5; cursor: default; }
+    .history-wrap { margin-top: 17px; }
+    .history-head { margin-bottom: 8px; }
+    .history { display: flex; max-height: 190px; flex-direction: column; gap: 6px; overflow: auto; padding-right: 3px; }
+    .history-empty { padding: 12px; border: 1px dashed #dedcd6; border-radius: 10px; color: #828985; text-align: center; font-size: 10px; }
+    .guess-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px solid #e8e5df; border-radius: 10px; background: #fff; font-size: 11px; animation: appear .2s ease; }
+    @keyframes appear { from { opacity: .2; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .puzzle-card { max-width: 780px; }
+    .puzzle-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .puzzle-level { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; color: #6d828a; background: #eff2f0; font-size: 10px; font-weight: 850; }
+    .puzzle-clock { color: var(--ink); font-size: 19px; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .puzzle-board { display: grid; gap: 8px; }
+    .memory-board { grid-template-columns: repeat(var(--memory-columns, 4), minmax(0, 1fr)); padding: 12px; border-radius: 17px; background: #f5f1ed; }
+    .memory-card { display: grid; min-width: 0; aspect-ratio: 1; place-items: center; padding: 5px; border: 1px solid #e8ded8; border-radius: 13px; background: #fff; box-shadow: 0 2px 0 rgba(76,79,75,.03); cursor: pointer; transition: transform .16s ease, background .16s ease, border-color .16s ease; }
+    .memory-card:hover:not(:disabled) { transform: translateY(-2px); border-color: #d1b9b0; }
+    .memory-card:disabled { cursor: default; }
+    .memory-board.locked .memory-card:not(.matched) { pointer-events: none; }
+    .memory-back { display: grid; width: 41%; aspect-ratio: 1; grid-template-columns: repeat(2, 1fr); gap: 3px; transform: rotate(-8deg); }
+    .memory-back i { border-radius: 4px; background: #e6d6d1; }
+    .memory-back i:nth-child(2), .memory-back i:nth-child(3) { background: #f0e5e0; }
+    .memory-swatch { width: 69%; aspect-ratio: 1; border: 4px solid rgba(255,255,255,.84); border-radius: 11px; box-shadow: 0 2px 6px rgba(65,65,60,.13); }
+    .memory-card.revealed { border-color: #e1cec6; background: #fbf5f2; }
+    .memory-card.matched { border-color: #cddacf; background: #eef3ed; cursor: default; }
+    .memory-card.matched .memory-swatch { box-shadow: 0 0 0 3px rgba(143,168,145,.15); }
+    .sliding-board { width: min(100%, 610px); grid-template-columns: repeat(var(--slide-size, 3), minmax(0, 1fr)); aspect-ratio: 1; gap: clamp(4px, 1vw, 8px); margin: 0 auto; padding: clamp(7px, 1.4vw, 12px); border-radius: 17px; background: #edf2f1; }
+    .slide-tile { display: grid; min-width: 0; place-items: center; border: 1px solid #d9e2df; border-radius: clamp(7px, 1.3vw, 12px); color: #536d71; background: #fff; font-size: clamp(13px, 3.7vw, 25px); font-weight: 850; font-variant-numeric: tabular-nums; box-shadow: 0 2px 0 rgba(76,79,75,.035); cursor: pointer; transition: transform .12s ease, background .12s ease, box-shadow .12s ease; }
+    .slide-tile:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(76,91,89,.09); }
+    .slide-tile:disabled { cursor: default; }
+    .slide-tile.empty { border-color: transparent; background: #e1e9e6; box-shadow: inset 0 1px 4px rgba(76,79,75,.05); }
+    .puzzle-foot { margin-top: 13px; }
+    .puzzle-stats { margin-top: 13px; }
+    .status.good { color: #718a7d; font-weight: 750; }
+    .gomoku-card { max-width: 780px; }
+    .gomoku-setup { padding: 20px; border: 1px solid #e7e2d8; border-radius: 17px; background: linear-gradient(145deg, #faf8f2, #fff); }
+    .gomoku-setup h2 { margin: 0; font-size: 16px; text-align: center; }
+    .gomoku-setup-copy { margin: 7px 0 17px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+    .gomoku-skill { margin: 0 0 16px; padding: 13px; border: 1px solid #e8e4da; border-radius: 13px; background: rgba(255,255,255,.82); }
+    .gomoku-skill-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+    .gomoku-skill-title { color: var(--ink); font-size: 11px; font-weight: 800; }
+    .gomoku-progress-note { color: var(--muted); font-size: 9px; }
+    .gomoku-skill-options { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+    .gomoku-skill-choice { min-height: 40px; border: 1px solid #e5e2dc; border-radius: 10px; color: #687372; background: #fff; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .gomoku-skill-choice.selected { border-color: #829b92; color: #526d65; background: #f1f4ef; box-shadow: 0 0 0 2px rgba(130,155,146,.12); }
+    .gomoku-difficulty-copy { margin: 9px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .gomoku-colors { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .gomoku-choice { display: grid; min-height: 68px; justify-items: center; align-content: center; gap: 6px; border: 1px solid #e5e2dc; border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+    .gomoku-choice:hover { transform: translateY(-1px); border-color: #c7c9bc; }
+    .gomoku-choice.selected { border-color: #829b92; background: #f1f4ef; box-shadow: 0 0 0 2px rgba(130,155,146,.12); }
+    .gomoku-choice-swatch, .gomoku-preview-stone { width: 23px; aspect-ratio: 1; border: 1px solid rgba(78,78,68,.2); border-radius: 50%; box-shadow: 0 2px 4px rgba(65,65,60,.12); }
+    .gomoku-choice-label { color: #687372; font-size: 9px; font-weight: 700; }
+    .gomoku-matchup { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 17px 0 14px; color: var(--muted); font-size: 10px; }
+    .gomoku-player-preview { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 750; }
+    .gomoku-preview-stone { display: inline-block; width: 18px; vertical-align: middle; }
+    .gomoku-vs { color: #aaa79c; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+    .gomoku-start-wrap { display: flex; justify-content: center; }
+    .gomoku-board-wrap { padding: clamp(8px, 2vw, 15px); border: 1px solid #e5dfd1; border-radius: 18px; background: #f8f5ec; }
+    .gomoku-board { display: grid; width: min(100%, 650px); grid-template-columns: repeat(15, minmax(0, 1fr)); grid-template-rows: repeat(15, minmax(0, 1fr)); aspect-ratio: 1; margin: 0 auto; overflow: hidden; border: 1px solid #d8cdb7; border-radius: 8px; background: #f0e9d9; box-shadow: inset 0 1px 5px rgba(95,82,62,.07); }
+    .gomoku-cell { position: relative; display: grid; min-width: 0; min-height: 0; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: manipulation; }
+    .gomoku-cell::before, .gomoku-cell::after { position: absolute; z-index: 0; display: block; content: ''; background: #b9ad97; pointer-events: none; }
+    .gomoku-cell::before { top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-50%); }
+    .gomoku-cell::after { top: 50%; right: 0; left: 0; height: 1px; transform: translateY(-50%); }
+    .gomoku-cell:nth-child(-n+15)::before { top: 50%; }
+    .gomoku-cell:nth-child(n+211)::before { bottom: 50%; }
+    .gomoku-cell:nth-child(15n+1)::after { left: 50%; }
+    .gomoku-cell:nth-child(15n)::after { right: 50%; }
+    .gomoku-cell:focus-visible { z-index: 3; outline: 2px solid #718f96; outline-offset: -2px; border-radius: 50%; }
+    .gomoku-cell:disabled { cursor: default; }
+    .gomoku-star-dot { z-index: 1; width: 16%; aspect-ratio: 1; border-radius: 50%; background: #a89d88; pointer-events: none; }
+    .gomoku-stone { z-index: 2; width: 77%; aspect-ratio: 1; border: 1px solid rgba(74,70,61,.2); border-radius: 50%; box-shadow: 0 1px 3px rgba(69,65,58,.22), inset 0 1px 2px rgba(255,255,255,.55); pointer-events: none; }
+    .gomoku-stone.white { border: 1px solid #aaa89e; box-shadow: 0 1px 3px rgba(69,65,58,.18), inset 0 1px 2px rgba(255,255,255,.9); }
+    .gomoku-stone.winning { outline: 3px solid rgba(116,147,132,.55); outline-offset: 1px; }
+    .gomoku-game-info { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 1px 12px; }
+    .gomoku-current { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); font-size: 11px; font-weight: 800; }
+    .gomoku-current-dot { width: 12px; aspect-ratio: 1; border: 1px solid rgba(75,72,64,.2); border-radius: 50%; }
+    .gomoku-foot { align-items: center; }
+    .gomoku-actions { display: flex; flex: none; align-items: center; gap: 7px; }
+    .gomoku-actions .action, .gomoku-actions .back-button { min-height: 36px; padding: 0 10px; font-size: 10px; }
+    .stroop-card { max-width: 670px; }
+    .stroop-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .stroop-round { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; color: #6d828a; background: #eff2f0; font-size: 10px; font-weight: 850; }
+    .stroop-clock { color: var(--ink); font-size: 20px; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .stroop-instruction { margin: 0 0 13px; color: var(--muted); text-align: center; font-size: 11px; }
+    .stroop-progress { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 1px 12px; }
+    .stroop-question-number { color: var(--muted); font-size: 10px; font-weight: 750; }
+    .stroop-scoreline { display: flex; gap: 10px; color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .stroop-scoreline b { color: #718a7d; }
+    .stroop-scoreline .wrong-count { color: #a97770; }
+    .stroop-question { display: grid; width: clamp(116px, 27vw, 190px); aspect-ratio: 1; place-items: center; margin: 0 auto 16px; border: 1px solid #e9e4dc; border-radius: 24px; background: #faf9f6; box-shadow: inset 0 1px 3px rgba(76,79,75,.025); font-size: clamp(76px, 17vw, 124px); font-weight: 950; line-height: 1; -webkit-text-stroke: .5px rgba(78,77,70,.2); }
+    .stroop-question.white-ink { -webkit-text-stroke: 1px #a6a49b; text-shadow: 0 1px 3px rgba(70,70,65,.24); }
+    .stroop-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 460px); margin: 0 auto; }
+    .stroop-option { display: flex; min-height: 57px; align-items: center; justify-content: center; gap: 9px; border: 1px solid #e5e2dc; border-radius: 14px; color: #596667; background: #fff; font-size: 15px; font-weight: 850; cursor: pointer; transition: transform .14s ease, border-color .14s ease, background .14s ease; }
+    .stroop-option:hover { transform: translateY(-1px); border-color: #c9cbc1; background: #fbfbf8; }
+    .stroop-option:active { transform: translateY(1px) scale(.99); }
+    .stroop-feedback { min-height: 19px; margin: 10px 0 0; color: var(--muted); text-align: center; font-size: 10px; }
+    .stroop-results { padding: 23px; border: 1px solid #e7e2d8; border-radius: 17px; background: linear-gradient(145deg, #faf8f2, #fff); text-align: center; }
+    .stroop-results h2 { margin: 0; font-size: 20px; }
+    .stroop-results-copy { margin: 8px 0 17px; color: var(--muted); font-size: 11px; }
+    .stroop-result-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 17px; }
+    .stroop-result-stat { padding: 12px 7px; border-radius: 12px; background: #f4f4ef; }
+    .stroop-result-stat span { display: block; color: var(--muted); font-size: 9px; }
+    .stroop-result-stat b { display: block; margin-top: 4px; font-size: 17px; font-variant-numeric: tabular-nums; }
+    .stroop-result-actions { display: flex; justify-content: center; gap: 8px; }
+    .guess-digits { display: flex; gap: 4px; }
+    .guess-digits .sequence-number { width: 20px; height: 23px; font-size: 11px; }
+    .guess-digits .sequence-color { width: 17px; height: 17px; }
+    .guess-result { color: var(--violet-dark); font-size: 10px; font-weight: 850; white-space: nowrap; }
+    @media (max-width: 760px) {
+      .launch-grid { width: min(100%, 760px); gap: 11px; }
+      .launch-card, .launch-card:last-child { width: 100%; min-height: 90px; padding: 15px 17px; grid-column: auto; }
+      .orb-area { width: 48px; height: 48px; }
+      .game-card { max-width: 560px; }
+    }
+    @media (max-width: 480px) {
+      .page { width: min(100% - 26px, 430px); padding-top: 18px; }
+      .topbar { margin-bottom: 34px; }
+      .top-note { display: none; }
+      .intro { margin-bottom: 24px; }
+      .intro-copy { font-size: 12px; }
+      .launch-grid { width: 100%; gap: 10px; }
+      .launch-card, .launch-card:last-child { width: 100%; min-height: 84px; grid-template-columns: 44px minmax(0,1fr) 30px; column-gap: 11px; padding: 12px; }
+      .orb-area { width: 44px; height: 44px; border-radius: 13px; }
+      .launch-copy { font-size: 11px; }
+      .game-header { margin-bottom: 12px; }
+      .game-card { padding: 16px; border-radius: 19px; }
+      .board { gap: 6px; padding: 9px; }
+      .tile { border-radius: 9px; font-size: 17px; }
+      .password-panel { padding: 14px; }
+      .slot-row { gap: 4px; }
+      .slot { border-radius: 9px; }
+      .color-keypad { gap: 5px; }
+      .color-key { gap: 4px; font-size: 9px; }
+      .color-chip { width: 14px; height: 14px; }
+      .puzzle-board { gap: 6px; }
+      .memory-board { grid-template-columns: repeat(var(--memory-columns-mobile, 4), minmax(0, 1fr)); padding: 8px; gap: 6px; }
+      .memory-card { border-radius: 9px; }
+      .memory-swatch { border-width: 3px; border-radius: 8px; }
+      .gomoku-card { padding: 12px; }
+      .gomoku-setup { padding: 14px; }
+      .gomoku-colors { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+      .gomoku-choice { min-height: 60px; }
+      .gomoku-board-wrap { padding: 6px; border-radius: 13px; }
+      .gomoku-cell::before, .gomoku-cell::after { background: #b9ad97; }
+      .gomoku-game-info { flex-wrap: wrap; }
+      .gomoku-foot { align-items: flex-start; flex-direction: column; }
+      .gomoku-actions { width: 100%; justify-content: flex-end; }
+      .stroop-card { padding: 16px; }
+      .stroop-question { margin-bottom: 12px; border-radius: 19px; }
+      .stroop-option { min-height: 53px; border-radius: 12px; }
+      .stroop-result-actions { flex-direction: column; }
+    }
+    @media (orientation: landscape) and (max-height: 900px) {
+      .page { width: min(100% - 24px, 980px); padding: 6px 0; }
+      .topbar { margin-bottom: 5px; }
+      .brand { gap: 7px; font-size: 12px; }
+      .brand-mark { width: 27px; height: 27px; border-radius: 9px; font-size: 14px; }
+      .top-actions { gap: 6px; }
+      .top-note { display: none; }
+      .language { padding: 2px; }
+      .language button { min-width: 28px; padding: 3px 6px; }
+      .game-header { margin-bottom: 5px; }
+      .back-button, .restart-button { min-height: 29px; padding: 0 9px; font-size: 9px; }
+      .game-heading { margin-bottom: 6px; }
+      .game-heading h1 { font-size: 21px; line-height: 1.1; }
+      .game-heading p { margin-top: 3px; font-size: 9px; line-height: 1.25; }
+      .game-card { max-width: 900px; padding: 9px; border-radius: 15px; }
+      #speed-panel #speed-play:not([hidden]), #memory-panel, #slide-panel, #gomoku-play:not([hidden]) {
+        display: grid; grid-template-columns: min(60vh, 45vw) minmax(0, 1fr); column-gap: clamp(10px, 2vw, 22px); align-items: center;
+      }
+      #speed-panel #speed-play:not([hidden]) { grid-template-rows: auto 1fr auto; row-gap: 5px; }
+      #speed-panel .board { width: 100%; grid-column: 1; grid-row: 1 / 4; gap: 4px; padding: 6px; }
+      #speed-panel .board-info { grid-column: 2; grid-row: 1; margin: 0; }
+      #speed-panel .timer { font-size: 17px; }
+      #speed-panel .tile { border-radius: 7px; font-size: clamp(12px, 2.5vh, 17px); }
+      #speed-panel .game-foot { grid-column: 2; grid-row: 2; align-items: center; flex-direction: column; justify-content: center; margin-top: 0; }
+      #speed-panel .status { min-height: 15px; font-size: 10px; }
+      #speed-panel .action { min-height: 29px; padding: 0 10px; font-size: 9px; }
+      #speed-panel .stats { grid-column: 2; grid-row: 3; margin-top: 0; }
+      #speed-panel .stat { padding: 5px 6px; }
+      #memory-panel { grid-template-rows: auto auto 1fr auto; row-gap: 4px; }
+      #memory-panel .puzzle-board { width: 100%; grid-column: 1; grid-row: 1 / 5; gap: 4px; padding: 6px; }
+      #memory-panel .puzzle-topline, #slide-panel .puzzle-topline { grid-column: 2; grid-row: 1; margin: 0; }
+      #memory-panel .board-info, #slide-panel .board-info { grid-column: 2; grid-row: 2; margin: 0; }
+      #memory-panel .game-foot, #slide-panel .game-foot { grid-column: 2; grid-row: 3; margin: 0; }
+      #memory-panel .stats, #slide-panel .stats { grid-column: 2; grid-row: 4; margin: 0; }
+      #memory-panel .stat, #slide-panel .stat { padding: 5px 6px; }
+      #slide-panel { grid-template-rows: auto auto 1fr auto; row-gap: 4px; }
+      #slide-panel .sliding-board { width: 100%; grid-column: 1; grid-row: 1 / 5; gap: 4px; padding: 6px; }
+      #slide-panel .puzzle-foot, #slide-panel .puzzle-stats { margin: 0; }
+      #gomoku-play:not([hidden]) { grid-template-rows: auto 1fr auto; row-gap: 5px; }
+      #gomoku-play .gomoku-board-wrap { width: 100%; grid-column: 1; grid-row: 1 / 4; padding: 5px; border-radius: 12px; }
+      #gomoku-play .gomoku-board { width: 100%; }
+      #gomoku-play .gomoku-game-info { grid-column: 2; grid-row: 1; flex-wrap: wrap; justify-content: center; margin: 0; }
+      #gomoku-play .gomoku-foot { grid-column: 2; grid-row: 3; align-items: center; margin: 0; }
+      #gomoku-play .gomoku-actions { width: auto; justify-content: center; }
+      #gomoku-play .gomoku-actions .action, #gomoku-play .gomoku-actions .back-button { min-height: 28px; font-size: 9px; }
+      .gomoku-setup { padding: 9px; }
+      .gomoku-setup h2 { font-size: 14px; }
+      .gomoku-setup-copy { margin: 4px 0 7px; font-size: 9px; }
+      .gomoku-skill { margin-bottom: 7px; padding: 7px; }
+      .gomoku-skill-head { margin-bottom: 4px; }
+      .gomoku-skill-options { gap: 5px; }
+      .gomoku-skill-choice { min-height: 29px; font-size: 9px; }
+      .gomoku-difficulty-copy { margin-top: 5px; font-size: 8px; }
+      .gomoku-colors { gap: 4px; }
+      .gomoku-choice { min-height: 41px; gap: 3px; border-radius: 8px; }
+      .gomoku-choice-swatch { width: 17px; }
+      .gomoku-choice-label { font-size: 8px; }
+      .gomoku-matchup { gap: 7px; margin: 7px 0; font-size: 9px; }
+      .gomoku-preview-stone { width: 14px; }
+      .gomoku-start-wrap .action { min-height: 29px; padding: 0 11px; font-size: 9px; }
+      .puzzle-topline .puzzle-clock { font-size: 16px; }
+      .puzzle-level { padding: 4px 7px; }
+      .memory-card { min-height: 0; border-radius: 6px; }
+      .memory-swatch { border-width: 2px; border-radius: 5px; }
+      .slide-tile { font-size: clamp(11px, 2.4vh, 17px); border-radius: 6px; }
+      .gomoku-game-info, .gomoku-current { font-size: 9px; }
+      .gomoku-current-dot { width: 9px; }
+      .gomoku-foot .status { font-size: 9px; text-align: center; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <button class="brand" id="brand-home" type="button" aria-label="数字游乐场">
+        <span class="brand-mark" aria-hidden="true">✳</span><span id="brand-name">数字游乐场</span>
+      </button>
+      <div class="top-actions">
+        <div class="top-note"><span class="live-dot" aria-hidden="true"></span><span data-i18n="anytime">随时来一局</span></div>
+        <div class="language" role="group" data-i18n-aria="languageAria">
+          <button id="lang-zh" type="button" aria-pressed="true">中</button>
+          <button id="lang-en" type="button" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="home-view">
+      <div class="intro">
+        <p class="eyebrow" data-i18n="eyebrow">level up your brain</p>
+        <h1 data-i18n="homeTitle">大脑升级训练</h1>
+        <p class="intro-copy" data-i18n="homeCopy">每天十分钟，脑力更轻松</p>
+      </div>
+      <div class="launch-grid" data-i18n-aria="gamesAria">
+        <button class="launch-card speed" type="button" data-game="speed">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol grid-symbol"><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="speedTitle">舒尔特方格</span>
+          <span class="launch-copy" data-i18n="speedCardCopy">依次点击 1 到 25，时间越短越好</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card number" type="button" data-game="number">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol key-symbol"><i>0</i><i>1</i><i>2</i><i>3</i></span></span>
+          <span class="launch-title" data-i18n="numberTitle">破译密码</span>
+          <span class="launch-copy" data-i18n="numberCardCopy">密码始终为四位数，可重复</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card color" type="button" data-game="color">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol color-symbol"><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="colorTitle">颜色推理</span>
+          <span class="launch-copy" data-i18n="colorCardCopy">排列颜色，不可重复</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card memory" type="button" data-game="memory">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol memory-symbol"><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="memoryTitle">颜色记忆</span>
+          <span class="launch-copy" data-i18n="memoryCardCopy">翻开卡牌，找出相同颜色的配对</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card slide" type="button" data-game="slide">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol slide-symbol"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i></i><i>7</i><i>8</i><i>6</i></span></span>
+          <span class="launch-title" data-i18n="slideTitle">数字滑块</span>
+          <span class="launch-copy" data-i18n="slideCardCopy">移动方块，把数字从小到大排序</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card gomoku" type="button" data-game="gomoku">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol gomoku-symbol"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="gomokuTitle">五子棋</span>
+          <span class="launch-copy" data-i18n="gomokuCardCopy">先将五颗棋子连成一线（横、竖或斜）的一方获胜</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card stroop" type="button" data-game="stroop">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol stroop-symbol">C</span></span>
+          <span class="launch-title" data-i18n="stroopTitle">颜色挑战</span>
+          <span class="launch-copy" data-i18n="stroopCardCopy">请选择字的颜色，不要选字的意思</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+      </div>
+      <footer class="page-footer" data-i18n="footer">By Lila Chen · 吉</footer>
+    </section>
+
+    <section id="game-view" hidden>
+      <div class="game-header">
+        <button class="back-button" id="back-home" type="button"><span aria-hidden="true">←</span><span data-i18n="allGames">所有游戏</span></button>
+        <button class="restart-button" id="restart-game" type="button"><span aria-hidden="true">↻</span><span data-i18n="restart">重新开始</span></button>
+      </div>
+      <div class="game-heading"><h1 id="game-title"></h1><p id="game-subtitle"></p></div>
+
+      <article class="game-card" id="speed-panel" hidden>
+        <div class="challenge-ready" id="speed-ready">
+          <h2 data-i18n="speedReadyTitle">准备好了吗？</h2>
+          <p data-i18n="speedStartIntro">点击开始后计时，依次点击 1 到 25</p>
+          <button class="action" id="speed-start" type="button" data-i18n="startButton">开始</button>
+        </div>
+        <div id="speed-play" hidden>
+          <div class="board-info">
+            <div class="next-label"><span data-i18n="nextNumber">下一个</span><span class="next-number" id="next-number">1</span></div>
+            <div class="timer" id="timer" aria-live="off">00:00.0</div>
+          </div>
+          <div class="board" id="board" role="group" aria-label="1 到 25 的打乱数字"></div>
+          <div class="game-foot">
+            <div class="status" id="speed-status" aria-live="polite"></div>
+            <button class="action" id="restart-speed" type="button"><span aria-hidden="true">↻</span><span data-i18n="playAgain">再来一局</span></button>
+          </div>
+          <div class="stats" data-i18n-aria="bestTimesAria">
+            <div class="stat"><span class="stat-label" data-i18n="currentTime">本局用时</span><span class="stat-value" id="current-time">—</span></div>
+            <div class="stat"><span class="stat-label" data-i18n="bestTime">最快纪录</span><span class="stat-value" id="best-time">—</span></div>
+          </div>
+        </div>
+        <div class="speed-results-overlay" id="speed-results" hidden>
+          <section class="speed-results-dialog" role="dialog" aria-modal="true" aria-labelledby="speed-result-title" aria-describedby="speed-result-tier">
+            <h2 id="speed-result-title" data-i18n="speedCompleteTitle">本轮完成</h2>
+            <p class="speed-result-tier" id="speed-result-tier"></p>
+            <div class="speed-result-stats">
+              <div class="speed-result-stat"><span data-i18n="currentTime">本局用时</span><strong id="speed-result-time">—</strong></div>
+              <div class="speed-result-stat"><span data-i18n="bestTime">最快纪录</span><strong id="speed-result-best">—</strong></div>
+            </div>
+            <div class="speed-result-actions">
+              <button class="action" id="speed-result-replay" type="button" data-i18n="playAgain">再来一局</button>
+              <button class="back-button" id="speed-result-home" type="button" data-i18n="allGames">所有游戏</button>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="game-card password-card" id="password-panel" hidden>
+        <div class="password-panel">
+          <div class="level-row">
+            <span class="level-pill"><span aria-hidden="true">✦</span><span id="level-label"></span></span>
+            <span class="attempt-note" id="attempt-note"></span>
+          </div>
+          <div class="progress-dots" id="progress-dots" data-i18n-aria="levelProgressAria"></div>
+          <div class="clue-box">
+            <div class="clue-title"><span data-i18n="knownClue">已知提示</span><span data-i18n="clueCountNote">这组猜测有几个对了</span></div>
+            <div class="clue-content"><div class="sequence" id="clue-sequence"></div><span class="clue-result" id="clue-result"></span></div>
+          </div>
+          <p class="rule-note" id="rule-note"></p>
+          <div class="slot-row" id="slots" data-i18n-aria="slotAria"></div>
+          <p class="code-help" id="code-help" aria-live="polite"></p>
+          <div class="keypad" id="keypad"></div>
+          <div class="code-actions">
+            <button class="action" id="submit-guess" type="button"><span data-i18n="submitGuess">提交猜测</span><span aria-hidden="true">→</span></button>
+            <button class="edit-key" id="delete-digit" type="button" aria-label="删除最后一位">⌫</button>
+          </div>
+        </div>
+        <div class="history-wrap">
+          <div class="history-head"><span data-i18n="guessHistory">猜测记录</span><span data-i18n="yourGuesses">你的每次尝试</span></div>
+          <div class="history" id="history" aria-live="polite"></div>
+        </div>
+      </article>
+
+      <article class="game-card puzzle-card" id="memory-panel" hidden>
+        <div class="puzzle-topline">
+          <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="memory-level"></span></span>
+          <span class="puzzle-clock" id="memory-clock">00:00.0</span>
+        </div>
+        <div class="board-info">
+          <span class="next-label" id="memory-pairs"></span>
+          <span class="attempt-note" id="memory-turns"></span>
+        </div>
+        <div class="puzzle-board memory-board" id="memory-board" role="group"></div>
+        <div class="game-foot puzzle-foot">
+          <div class="status" id="memory-status" aria-live="polite"></div>
+        </div>
+        <div class="stats puzzle-stats" data-i18n-aria="memoryStatsAria">
+          <div class="stat"><span class="stat-label" data-i18n="memoryFlips">翻牌次数</span><span class="stat-value" id="memory-flips">0</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="memoryMatched">已配对</span><span class="stat-value" id="memory-matched">0 / 6</span></div>
+        </div>
+      </article>
+
+      <article class="game-card puzzle-card" id="slide-panel" hidden>
+        <div class="puzzle-topline">
+          <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="slide-level"></span></span>
+          <span class="puzzle-clock" id="slide-clock">00:00.0</span>
+        </div>
+        <div class="board-info">
+          <span class="next-label" id="slide-size-label"></span>
+          <span class="attempt-note" id="slide-moves"></span>
+        </div>
+        <div class="puzzle-board sliding-board" id="slide-board" role="group"></div>
+        <div class="game-foot puzzle-foot">
+          <div class="status" id="slide-status" aria-live="polite"></div>
+        </div>
+        <div class="stats puzzle-stats" data-i18n-aria="slideStatsAria">
+          <div class="stat"><span class="stat-label" data-i18n="slideMovesLabel">移动次数</span><span class="stat-value" id="slide-move-stat">0</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="slideBoardLabel">棋盘</span><span class="stat-value" id="slide-board-stat">3 × 3</span></div>
+        </div>
+      </article>
+
+      <article class="game-card gomoku-card" id="gomoku-panel" hidden>
+        <div class="gomoku-setup" id="gomoku-setup">
+          <h2 data-i18n="gomokuSetupTitle">棋子颜色设置</h2>
+          <p class="gomoku-setup-copy" data-i18n="gomokuSetupCopy">你先手</p>
+          <div class="gomoku-skill">
+            <div class="gomoku-skill-head"><span class="gomoku-skill-title" data-i18n="gomokuSkillPrompt">你的程度</span><span class="gomoku-progress-note" id="gomoku-progress-note"></span></div>
+            <div class="gomoku-skill-options" id="gomoku-skill-options" role="group"></div>
+            <p class="gomoku-difficulty-copy" data-i18n="gomokuDifficultyCopy">新手从第 1 关开始，熟练从第 50 关开始；每完成一局，难度升一级</p>
+          </div>
+          <div class="gomoku-colors" id="gomoku-colors" role="group"></div>
+          <div class="gomoku-matchup" id="gomoku-matchup"></div>
+          <div class="gomoku-start-wrap"><button class="action" id="gomoku-start" type="button" data-i18n="startGomoku">开始对弈</button></div>
+        </div>
+        <div id="gomoku-play" hidden>
+          <div class="gomoku-game-info">
+            <span class="puzzle-level" id="gomoku-level-label"></span>
+            <span class="gomoku-current"><span class="gomoku-current-dot" id="gomoku-turn-dot"></span><span id="gomoku-turn-label"></span></span>
+            <span class="attempt-note" id="gomoku-move-label"></span>
+          </div>
+          <div class="gomoku-board-wrap"><div class="gomoku-board" id="gomoku-board" role="group"></div></div>
+          <div class="game-foot gomoku-foot">
+            <div class="status" id="gomoku-status" aria-live="polite"></div>
+            <div class="gomoku-actions">
+              <button class="action" id="gomoku-next-round" type="button" hidden></button>
+              <button class="back-button" id="gomoku-change-color" type="button" data-i18n="changePieceColor">更换颜色</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="game-card stroop-card" id="stroop-panel" hidden>
+        <div class="challenge-ready" id="stroop-ready">
+          <h2 data-i18n="stroopReadyTitle">准备开始颜色挑战？</h2>
+          <p data-i18n="stroopStartIntro">请选择字的颜色，不要选字的意思</p>
+          <button class="action" id="stroop-start" type="button" data-i18n="startButton">开始</button>
+        </div>
+        <div id="stroop-round-view">
+          <div class="stroop-topline">
+            <span class="stroop-round"><span aria-hidden="true">✦</span><span id="stroop-level"></span></span>
+            <span class="stroop-clock" id="stroop-clock">00:00.0</span>
+          </div>
+          <div class="stroop-progress">
+            <span class="stroop-question-number" id="stroop-question-count"></span>
+            <span class="stroop-scoreline"><span><b id="stroop-correct">0</b> <span data-i18n="correctShort">答对</span></span><span><b class="wrong-count" id="stroop-wrong">0</b> <span data-i18n="wrongShort">答错</span></span></span>
+          </div>
+          <div class="stroop-question" id="stroop-question" aria-live="polite"></div>
+          <div class="stroop-options" id="stroop-options" role="group"></div>
+          <p class="stroop-feedback" id="stroop-feedback" aria-live="polite"></p>
+        </div>
+        <div class="stroop-results" id="stroop-results" hidden>
+          <h2 data-i18n="roundComplete">本关完成！</h2>
+          <p class="stroop-results-copy" id="stroop-result-level"></p>
+          <div class="stroop-result-stats">
+            <div class="stroop-result-stat"><span data-i18n="correctCount">答对</span><b id="stroop-result-correct">0</b></div>
+            <div class="stroop-result-stat"><span data-i18n="wrongCount">答错</span><b id="stroop-result-wrong">0</b></div>
+            <div class="stroop-result-stat"><span data-i18n="totalTime">用时</span><b id="stroop-result-time">00:00.0</b></div>
+          </div>
+          <div class="stroop-result-actions">
+            <button class="back-button" id="stroop-replay" type="button" data-i18n="replayLevel">再玩本关</button>
+            <button class="action" id="stroop-next" type="button"><span data-i18n="nextLevel">下一关</span><span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const copy = {
+        zh: {
+          anytime: '随时来一局', eyebrow: 'level up your brain', homeTitle: '大脑升级训练',
+          homeCopy: '每天十分钟，脑力更轻松', speedTitle: '舒尔特方格', speedCardCopy: '依次点击 1 到 25，时间越短越好',
+          numberTitle: '破译密码', numberCardCopy: '密码始终为四位数，可重复', colorTitle: '颜色推理',
+          colorCardCopy: '排列颜色，不可重复', playNow: '开始玩', footer: 'By Lila Chen · 吉',
+          memoryTitle: '颜色记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', slideTitle: '数字滑块', slideCardCopy: '移动方块，把数字从小到大排序',
+          gomokuTitle: '五子棋', gomokuCardCopy: '先将五颗棋子连成一线（横、竖或斜）的一方获胜',
+          stroopTitle: '颜色挑战', stroopCardCopy: '请选择字的颜色，不要选字的意思',
+          allGames: '所有游戏', restart: '重新开始', speedSubtitle: '依次点击 1 到 25，时间越短越好',
+          numberSubtitle: '密码始终四位数；每 8 关，已知提示会更难', colorSubtitle: '始终猜四格；每 8 关增加一种可选颜色',
+          memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', slideSubtitle: '移动方块，把数字从小到大排序',
+          gomokuSubtitle: '先将五颗棋子连成一线（横、竖或斜）的一方获胜', choosePieceColor: '棋子颜色',
+          gomokuSetupCopy: '你先手',
+          gomokuSetupTitle: '棋子颜色设置', gomokuSkillPrompt: '你的程度', gomokuBeginner: '新手', gomokuSkilled: '熟练',
+          gomokuProgress: '已玩 {plays} 局 · 当前第 {level} 关',
+          gomokuDifficultyCopy: '新手从第 1 关开始，熟练从第 50 关开始；每完成一局，难度升一级',
+          gomokuNextRound: '下一局 · 第 {n} 关',
+          yourPiece: '你的棋子', computerPiece: '电脑棋子', vs: 'VS', whiteColor: '白色', startGomoku: '开始对弈',
+          changePieceColor: '更换颜色', gomokuYourTurn: '轮到你了', gomokuComputerTurn: '电脑思考中…',
+          gomokuYouWin: '你赢了！五子连成一线', gomokuComputerWins: '电脑赢了，这一局下得不错', gomokuDraw: '平局！棋盘下满了',
+          gomokuMoves: '已下 {n} 子', gomokuBoardAria: '五子棋 15 乘 15 棋盘', gomokuEmptyCell: '第 {row} 行第 {col} 列，空位',
+          gomokuPlayerCell: '第 {row} 行第 {col} 列，你的棋子', gomokuComputerCell: '第 {row} 行第 {col} 列，电脑的棋子',
+          stroopSubtitle: '每五关增加一种颜色；每关十题',
+          stroopInstruction: '选择字的颜色，不要选字的意思', stroopReadyTitle: '准备好了吗？',
+          stroopStartIntro: '请选择字的颜色，不要选字的意思', questionNumber: '第 {n} / 10 题',
+          correctShort: '答对', wrongShort: '答错', roundComplete: '本关完成！', roundResult: '第 {n} 关成绩',
+          correctCount: '答对', wrongCount: '答错', totalTime: '用时', replayLevel: '再玩本关', nextLevel: '下一关',
+          stroopOptionsAria: '选择字色选项',
+          memoryPairs: '找出 {n} 组相同颜色', memoryTurns: '配对回合 {n}', memoryFlips: '翻牌次数', memoryMatched: '已配对',
+          memoryReady: '翻开两张卡牌，找出相同颜色', memoryNeedPair: '再翻一张卡牌', memoryPairGood: '配对成功！继续找',
+          memoryPairMiss: '颜色不同，记住它们的位置', memoryWin: '太棒了！马上进入下一关', memoryCardsAria: '颜色配对卡牌',
+          memoryCardHidden: '未翻开的卡牌 {n}', memoryCardShown: '已翻开的颜色卡牌 {n}', memoryCardMatched: '已配对的卡牌 {n}',
+          slideReady: '点击空格旁边的数字即可移动', slideSolved: '排好了！马上进入下一关',
+          slideMoves: '移动 {n} 次', slideBoardSize: '棋盘 {n} × {n}', slideMovesLabel: '移动次数', slideBoardLabel: '棋盘',
+          size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
+          numberRule: '数字可重复或以 0 开头；每 8 关提示少一个对的，最多降至 0', colorRule: '每种颜色只能用一次；每 8 关增加一种选择',
+          nextNumber: '下一个', speedReadyTitle: '准备好了吗？', speedStartIntro: '点击开始后计时，依次点击 1 到 25', startButton: '开始',
+          speedReady: '', speedWrong: '找的是 {n}，再试试看',
+          speedGood: '很好！继续找 {n}', speedFinal: '最后一个啦，加油！', speedDone: '太棒了！这一局完成啦', speedCompleteTitle: '本轮完成',
+          speedPilot: '飞行员级别!!', speedExpert: '高手!!', speedEncourage: '继续加油!!', speedPractice: '需要强化哦!!',
+          playAgain: '再来一局', currentTime: '本局用时', bestTime: '最快纪录', knownClue: '已知提示',
+          clueCountNote: '这组猜测有几个对了', submitGuess: '提交猜测', guessHistory: '猜测记录', yourGuesses: '你的每次尝试',
+          initialHelp: '先看这组提示，然后开始猜', enterMore: '还差 {n} 位', readySubmit: '数字齐了，提交看看吧！',
+          afterGuess: '记住结果，再试一组数字', solvedNext: '猜中了！准备进入下一关',
+          solvedMax: '太厉害了！你破解了最高难度', level: '第 {n} 关', guesses: '已猜 {n} 次',
+          correct: '有 {n} 个对了', duplicateColor: '这个颜色已经选过啦，从第 {n} 格重新选', colorNames: ['豆沙红', '杏橙', '芥末黄', '草绿', '雾霾蓝', '灰紫', '玫粉', '青绿', '橄榄绿', '焦糖棕'],
+          lengthName: ['四位', '五位', '六位', '七位', '八位', '九位', '十位'], passwordLength: '{n}密码',
+          noHistory: '提交你的第一组猜测吧', speedAria: '1 到 25 的打乱数字', slotAria: '当前输入',
+          languageAria: '语言', gamesAria: '小游戏', bestTimesAria: '最佳成绩', levelProgressAria: '关卡进度',
+          memoryStatsAria: '颜色记忆成绩', slideStatsAria: '数字滑块成绩',
+          digits: '数字', colors: '颜色', numberAria: '数字 {n}', doneAria: '数字 {n}，已完成'
+        },
+        en: {
+          anytime: 'Ready for a quick round', eyebrow: 'level up your brain', homeTitle: 'Brain Training',
+          homeCopy: 'Ten minutes a day, a brighter brain at play', speedTitle: 'Schulte Grid', speedCardCopy: 'Tap 1 to 25 in order as fast as you can',
+          numberTitle: 'Code Breaker', numberCardCopy: 'The code is always four digits and may repeat', colorTitle: 'Color Logic',
+          colorCardCopy: 'Arrange the colors with no repeats', playNow: 'Play now', footer: 'By Lila Chen · 吉',
+          memoryTitle: 'Color Memory', memoryCardCopy: 'Flip the cards and find matching colors', slideTitle: 'Number Slide', slideCardCopy: 'Move the tiles to arrange the numbers from smallest to largest',
+          gomokuTitle: 'Gomoku', gomokuCardCopy: 'Connect five stones in a row, column, or diagonal to win',
+          stroopTitle: 'Color Challenge', stroopCardCopy: 'Choose the ink color, not what the word means',
+          allGames: 'All games', restart: 'Start over', speedSubtitle: 'Tap 1 to 25 in order as fast as you can',
+          numberSubtitle: 'The code stays four digits; the clue gets harder every 8 levels', colorSubtitle: 'The code stays four slots; every 8 levels adds one color option',
+          memorySubtitle: 'Remember where each color is and find every matching pair', slideSubtitle: 'Move the tiles to arrange the numbers from smallest to largest',
+          gomokuSubtitle: 'Connect five stones in a row, column, or diagonal to win', choosePieceColor: 'Stone color',
+          gomokuSetupCopy: 'You go first',
+          gomokuSetupTitle: 'Stone color settings', gomokuSkillPrompt: 'Your level', gomokuBeginner: 'Beginner', gomokuSkilled: 'Skilled',
+          gomokuProgress: 'Games played: {plays} · Current level: {level}',
+          gomokuDifficultyCopy: 'Beginner starts at level 1; Skilled starts at level 50, and each completed game raises the difficulty by one',
+          gomokuNextRound: 'Next game · Level {n}',
+          yourPiece: 'Your stone', computerPiece: 'Computer', vs: 'VS', whiteColor: 'White', startGomoku: 'Start game',
+          changePieceColor: 'Change color', gomokuYourTurn: 'Your turn', gomokuComputerTurn: 'Computer is thinking…',
+          gomokuYouWin: 'You win! Five in a row', gomokuComputerWins: 'The computer wins, but that was a nice game', gomokuDraw: 'It’s a draw; the board is full',
+          gomokuMoves: '{n} stones played', gomokuBoardAria: '15 by 15 Gomoku board', gomokuEmptyCell: 'Row {row}, column {col}, empty',
+          gomokuPlayerCell: 'Row {row}, column {col}, your stone', gomokuComputerCell: 'Row {row}, column {col}, computer stone',
+          stroopSubtitle: 'Add one color every five levels; ten questions per level',
+          stroopInstruction: 'Choose the ink color, not what the letter means', stroopReadyTitle: 'Are you ready?',
+          stroopStartIntro: 'Choose the ink color, not what the word means', questionNumber: 'Question {n} / 10',
+          correctShort: 'Right', wrongShort: 'Wrong', roundComplete: 'Level complete!', roundResult: 'Level {n} results',
+          correctCount: 'Correct', wrongCount: 'Wrong', totalTime: 'Time', replayLevel: 'Replay level', nextLevel: 'Next level',
+          stroopOptionsAria: 'Choose the ink color',
+          memoryPairs: 'Find {n} matching color pairs', memoryTurns: 'Pair attempts: {n}', memoryFlips: 'Card flips', memoryMatched: 'Matched',
+          memoryReady: 'Flip two cards and find a matching color', memoryNeedPair: 'Flip one more card', memoryPairGood: 'A match! Keep going',
+          memoryPairMiss: 'No match, remember where they are', memoryWin: 'Great job! Next level coming up', memoryCardsAria: 'Color matching cards',
+          memoryCardHidden: 'Face-down card {n}', memoryCardShown: 'Revealed color card {n}', memoryCardMatched: 'Matched card {n}',
+          slideReady: 'Click a number next to the empty space to move it', slideSolved: 'Solved! Next level coming up',
+          slideMoves: '{n} moves', slideBoardSize: 'Board: {n} × {n}', slideMovesLabel: 'Moves', slideBoardLabel: 'Board',
+          size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
+          numberRule: 'Digits may repeat or start with 0; every 8 levels the clue gives one fewer match, down to zero', colorRule: 'Use each color once; one option is added every 8 levels',
+          nextNumber: 'Next', speedReadyTitle: 'Ready?', speedStartIntro: 'The timer starts when you tap Start, then tap 1 to 25 in order', startButton: 'Start',
+          speedReady: '', speedWrong: 'Find {n} next, try again!',
+          speedGood: 'Nice! Now find {n}', speedFinal: 'One more to go!', speedDone: 'Amazing! You finished the round', speedCompleteTitle: 'Round complete',
+          speedPilot: 'Pilot level!!', speedExpert: 'Expert!!', speedEncourage: 'Keep it up!!', speedPractice: 'More practice needed!!',
+          playAgain: 'Play again', currentTime: 'This round', bestTime: 'Best time', knownClue: 'Starting clue',
+          clueCountNote: 'correct in this guess', submitGuess: 'Submit guess', guessHistory: 'Guess history', yourGuesses: 'Your attempts',
+          initialHelp: 'Start with the clue, then make a guess', enterMore: '{n} more to go', readySubmit: 'All set, submit your guess!',
+          afterGuess: 'Keep the result in mind and try again', solvedNext: 'Cracked! On to the next level',
+          solvedMax: 'Incredible! You cracked the hardest level', solvedMaxShort: 'You cracked the 10-slot code!',
+          level: 'Level {n}', guesses: 'Guesses: {n}', correct: '{n} correct', duplicateColor: 'That color is already used; pick again from slot {n}', colorNames: ['Dusty rose', 'Apricot', 'Mustard', 'Grass green', 'Slate blue', 'Muted violet', 'Blush pink', 'Teal', 'Olive', 'Taupe'],
+          lengthName: ['4-digit', '5-digit', '6-digit', '7-digit', '8-digit', '9-digit', '10-digit'], passwordLength: '{n} code',
+          noHistory: 'Submit your first guess to get started', speedAria: 'Shuffled numbers from 1 to 25', slotAria: 'Current guess',
+          languageAria: 'Language', gamesAria: 'Games', bestTimesAria: 'Best times', levelProgressAria: 'Level progress',
+          memoryStatsAria: 'Color memory stats', slideStatsAria: 'Number sliding puzzle stats',
+          digits: 'digits', colors: 'colors', numberAria: 'Number {n}', doneAria: 'Number {n}, completed'
+        }
+      };
+      const palette = [
+        { nameIndex: 0, hex: '#c58d8c' }, { nameIndex: 1, hex: '#d0a17c' }, { nameIndex: 2, hex: '#d1c080' },
+        { nameIndex: 3, hex: '#93aa7e' }, { nameIndex: 4, hex: '#829bb0' }, { nameIndex: 5, hex: '#9b8aa8' },
+        { nameIndex: 6, hex: '#c58fa0' }, { nameIndex: 7, hex: '#7ca49c' }, { nameIndex: 8, hex: '#9fa56f' },
+        { nameIndex: 9, hex: '#a78c75' }
+      ];
+      const gomokuWhite = '#fffdfa';
+      const gomokuColors = [...palette.map((color) => ({ hex: color.hex, nameIndex: color.nameIndex })), { hex: gomokuWhite, white: true }];
+      const stroopColors = [
+        { zh: '红', enLetter: 'R', enName: 'Red', hex: palette[0].hex },
+        { zh: '绿', enLetter: 'G', enName: 'Green', hex: palette[3].hex },
+        { zh: '黄', enLetter: 'Y', enName: 'Yellow', hex: palette[2].hex },
+        { zh: '蓝', enLetter: 'B', enName: 'Blue', hex: palette[4].hex },
+        { zh: '紫', enLetter: 'V', enName: 'Purple', hex: palette[5].hex },
+        { zh: '灰', enLetter: 'S', enName: 'Gray', hex: '#a6a49d' },
+        { zh: '白', enLetter: 'W', enName: 'White', hex: '#fffdfa', white: true },
+        { zh: '橙', enLetter: 'O', enName: 'Orange', hex: palette[1].hex },
+        { zh: '粉', enLetter: 'P', enName: 'Pink', hex: palette[6].hex }
+      ];
+      const t = (key, params = {}) => {
+        let value = copy[language][key] ?? key;
+        for (const [name, replacement] of Object.entries(params)) value = value.replaceAll(`{${name}}`, String(replacement));
+        return value;
+      };
+      const word = (key, index) => copy[language][key][index] || copy[language][key].at(-1);
+
+      let language = 'zh';
+      try { language = localStorage.getItem('playground-language') === 'en' ? 'en' : 'zh'; } catch (_) {}
+      let activeGame = '';
+      let speedNext = 1;
+      let speedStart = 0;
+      let speedTick = 0;
+      let speedFinished = false;
+      let speedElapsed = 0;
+      let speedStatusKey = 'speedReady';
+      let speedStatusParams = {};
+      let bestMs = 0;
+      try { bestMs = Number(localStorage.getItem('number-playground-best-ms')) || 0; } catch (_) {}
+      const password = { mode: '', level: 1, length: 4, target: [], guess: [], history: [], locked: false, jumpBackIndex: -1, helpKey: 'initialHelp', helpParams: {}, nextTimer: 0 };
+      const memory = { level: 1, pairs: 6, cards: [], matched: new Set(), open: [], flips: 0, turns: 0, locked: false, startedAt: 0, elapsed: 0, clock: 0, pendingTimer: 0, nextTimer: 0, statusKey: 'memoryReady' };
+      const slide = { level: 1, size: 3, tiles: [], moves: 0, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, finished: false, statusKey: 'slideReady' };
+      let savedGomokuProfile = { skill: 'beginner', beginnerGames: 0, skilledGames: 0 };
+      try {
+        const saved = JSON.parse(localStorage.getItem('number-playground-gomoku-profile') || 'null');
+        if (saved && (saved.skill === 'beginner' || saved.skill === 'skilled')) savedGomokuProfile.skill = saved.skill;
+        if (saved && Number.isFinite(Number(saved.beginnerGames))) savedGomokuProfile.beginnerGames = Math.max(0, Math.floor(Number(saved.beginnerGames)));
+        if (saved && Number.isFinite(Number(saved.skilledGames))) savedGomokuProfile.skilledGames = Math.max(0, Math.floor(Number(saved.skilledGames)));
+        if (saved && Number.isFinite(Number(saved.gamesPlayed))) {
+          const key = savedGomokuProfile.skill === 'skilled' ? 'skilledGames' : 'beginnerGames';
+          if (!Number.isFinite(Number(saved[key]))) savedGomokuProfile[key] = Math.max(0, Math.floor(Number(saved.gamesPlayed)));
+        }
+      } catch (_) {}
+      const gomoku = {
+        playerColor: palette[0].hex, computerColor: gomokuWhite, cells: [], active: false, thinking: false, over: false,
+        moves: 0, statusKey: 'gomokuYourTurn', aiTimer: 0, winningCells: [],
+        skill: savedGomokuProfile.skill,
+        skillGames: { beginner: savedGomokuProfile.beginnerGames, skilled: savedGomokuProfile.skilledGames },
+        gamesPlayed: savedGomokuProfile[savedGomokuProfile.skill === 'skilled' ? 'skilledGames' : 'beginnerGames'],
+        level: gomokuLevelFor(savedGomokuProfile.skill, savedGomokuProfile[savedGomokuProfile.skill === 'skilled' ? 'skilledGames' : 'beginnerGames']),
+        matchLevel: 1, resultRecorded: false
+      };
+      const stroop = { level: 1, colorOrder: [], questions: [], index: 0, correct: 0, wrong: 0, startedAt: 0, elapsed: 0, clock: 0, started: false, finished: false };
+      const $ = (id) => document.getElementById(id);
+      const homeView = $('home-view');
+      const gameView = $('game-view');
+      const speedPanel = $('speed-panel');
+      const passwordPanel = $('password-panel');
+      const memoryPanel = $('memory-panel');
+      const slidePanel = $('slide-panel');
+      const gomokuPanel = $('gomoku-panel');
+      const stroopPanel = $('stroop-panel');
+      const speedStatus = $('speed-status');
+
+      function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor(ms / 1000) % 60;
+        const tenths = Math.floor(ms / 100) % 10;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
+      }
+      function updateStaticCopy() {
+        document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+        document.title = language === 'zh' ? '数字游乐场 · 小游戏' : 'Number Playground · Mini Games';
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.dataset.i18n;
+          node.innerHTML = t(key);
+        });
+        document.querySelectorAll('[data-i18n-aria]').forEach((node) => node.setAttribute('aria-label', t(node.dataset.i18nAria)));
+        $('brand-name').textContent = language === 'zh' ? '数字游乐场' : 'Number Playground';
+        $('lang-zh').classList.toggle('active', language === 'zh');
+        $('lang-en').classList.toggle('active', language === 'en');
+        $('lang-zh').setAttribute('aria-pressed', String(language === 'zh'));
+        $('lang-en').setAttribute('aria-pressed', String(language === 'en'));
+        $('brand-home').setAttribute('aria-label', language === 'zh' ? '数字游乐场，返回首页' : 'Number Playground, home');
+        $('back-home').setAttribute('aria-label', t('allGames'));
+        if (activeGame) renderGameHeading();
+        if (activeGame === 'speed') {
+          renderSpeedStatus();
+          if (speedFinished) $('speed-result-tier').textContent = t(speedStatusKey);
+        }
+        if (activeGame === 'number' || activeGame === 'color') renderPassword();
+        if (activeGame === 'memory') renderMemory();
+        if (activeGame === 'slide') renderSlide();
+        if (activeGame === 'gomoku') { renderGomokuSetup(); if (gomoku.active) renderGomokuBoard(); }
+        if (activeGame === 'stroop') renderStroop();
+      }
+      function setLanguage(next) {
+        language = next;
+        try { localStorage.setItem('playground-language', language); } catch (_) {}
+        updateStaticCopy();
+      }
+      function renderGameHeading() {
+        const gameKeys = {
+          speed: ['speedTitle', 'speedSubtitle'], number: ['numberTitle', 'numberSubtitle'], color: ['colorTitle', 'colorSubtitle'],
+          memory: ['memoryTitle', 'memorySubtitle'], slide: ['slideTitle', 'slideSubtitle'], gomoku: ['gomokuTitle', 'gomokuSubtitle'],
+          stroop: ['stroopTitle', 'stroopSubtitle']
+        };
+        const [titleKey, subtitleKey] = gameKeys[activeGame] || gameKeys.speed;
+        $('game-title').textContent = t(titleKey);
+        $('game-subtitle').textContent = t(subtitleKey);
+      }
+      function renderSpeedStatus() { speedStatus.textContent = t(speedStatusKey, speedStatusParams); }
+      function setSpeedStatus(key, params = {}) { speedStatusKey = key; speedStatusParams = params; renderSpeedStatus(); }
+      function shuffle(values) {
+        for (let i = values.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [values[i], values[j]] = [values[j], values[i]];
+        }
+        return values;
+      }
+      function stopSpeedClock() { if (speedTick) cancelAnimationFrame(speedTick); speedTick = 0; }
+      function prepareSpeedGame() {
+        stopSpeedClock(); speedNext = 1; speedStart = 0; speedFinished = false; speedElapsed = 0;
+        $('timer').textContent = '00:00.0'; $('current-time').textContent = '—'; $('next-number').textContent = '1';
+        $('speed-ready').hidden = false; $('speed-play').hidden = true; $('speed-results').hidden = true;
+        $('best-time').textContent = bestMs ? formatTime(bestMs) : '—';
+      }
+      function updateSpeedClock() {
+        if (!speedStart || speedFinished || activeGame !== 'speed') return;
+        speedElapsed = performance.now() - speedStart;
+        $('timer').textContent = formatTime(speedElapsed);
+        speedTick = requestAnimationFrame(updateSpeedClock);
+      }
+      function startSpeedGame() {
+        stopSpeedClock();
+        speedNext = 1;
+        speedStart = 0;
+        speedFinished = false;
+        speedElapsed = 0;
+        $('timer').textContent = '00:00.0';
+        $('current-time').textContent = '—';
+        $('next-number').textContent = '1';
+        $('speed-results').hidden = true;
+        setSpeedStatus('speedReady');
+        $('best-time').textContent = bestMs ? formatTime(bestMs) : '—';
+        const board = $('board');
+        board.setAttribute('aria-label', t('speedAria'));
+        board.replaceChildren();
+        shuffle(Array.from({ length: 25 }, (_, i) => i + 1)).forEach((value) => {
+          const tile = document.createElement('button');
+          tile.type = 'button'; tile.className = 'tile'; tile.textContent = value;
+          tile.setAttribute('aria-label', t('numberAria', { n: value }));
+          tile.addEventListener('click', () => selectSpeedNumber(tile, value));
+          board.append(tile);
+        });
+        $('speed-ready').hidden = true; $('speed-play').hidden = false;
+        speedStart = performance.now(); speedTick = requestAnimationFrame(updateSpeedClock);
+      }
+      function selectSpeedNumber(tile, value) {
+        if (speedFinished || tile.disabled) return;
+        if (value !== speedNext) {
+          tile.classList.remove('wrong'); void tile.offsetWidth; tile.classList.add('wrong');
+          setSpeedStatus('speedWrong', { n: speedNext });
+          window.setTimeout(() => tile.classList.remove('wrong'), 320);
+          return;
+        }
+        tile.disabled = true; tile.classList.add('done');
+        tile.setAttribute('aria-label', t('doneAria', { n: value }));
+        speedNext++;
+        if (speedNext > 25) {
+          speedFinished = true; stopSpeedClock(); speedElapsed = performance.now() - speedStart;
+          $('timer').textContent = formatTime(speedElapsed); $('current-time').textContent = formatTime(speedElapsed);
+          const resultKey = speedElapsed < 10000 ? 'speedPilot'
+            : speedElapsed < 25000 ? 'speedExpert'
+            : speedElapsed <= 35000 ? 'speedEncourage'
+            : 'speedPractice';
+          setSpeedStatus(resultKey);
+          $('speed-result-tier').textContent = t(resultKey);
+          $('speed-result-time').textContent = formatTime(speedElapsed);
+          if (!bestMs || speedElapsed < bestMs) {
+            bestMs = speedElapsed;
+            try { localStorage.setItem('number-playground-best-ms', String(bestMs)); } catch (_) {}
+            $('best-time').textContent = formatTime(bestMs);
+          }
+          $('speed-result-best').textContent = bestMs ? formatTime(bestMs) : '—';
+          $('speed-results').hidden = false;
+          $('speed-result-replay').focus();
+          $('next-number').textContent = '✓';
+        } else {
+          $('next-number').textContent = String(speedNext);
+          setSpeedStatus(speedNext === 25 ? 'speedFinal' : 'speedGood', { n: speedNext });
+        }
+      }
+
+      function stopMemoryClock() {
+        if (memory.clock) window.clearInterval(memory.clock);
+        memory.clock = 0;
+      }
+      function stopSlideClock() {
+        if (slide.clock) window.clearInterval(slide.clock);
+        slide.clock = 0;
+      }
+      function memoryElapsed() { return memory.startedAt ? performance.now() - memory.startedAt : memory.elapsed; }
+      function slideElapsed() { return slide.startedAt ? performance.now() - slide.startedAt : slide.elapsed; }
+      function updateMemoryClock() { if (activeGame === 'memory') $('memory-clock').textContent = formatTime(memoryElapsed()); }
+      function updateSlideClock() { if (activeGame === 'slide') $('slide-clock').textContent = formatTime(slideElapsed()); }
+      function getMemoryPairs(level = memory.level) { return 6 + Math.floor((level - 1) / 9); }
+      function getMemoryColumns(pairs) { return pairs <= 8 ? 4 : pairs <= 18 ? 6 : 8; }
+      function getMemoryColor(index) {
+        if (index < palette.length) return palette[index].hex;
+        return `hsl(${Math.round((index * 137.508) % 360)} 42% 62%)`;
+      }
+      function startMemoryClock() {
+        if (memory.startedAt) return;
+        memory.startedAt = performance.now();
+        memory.clock = window.setInterval(updateMemoryClock, 100);
+      }
+      function beginMemoryLevel() {
+        window.clearTimeout(memory.pendingTimer);
+        window.clearTimeout(memory.nextTimer);
+        stopMemoryClock();
+        memory.pairs = getMemoryPairs();
+        memory.cards = shuffle(Array.from({ length: memory.pairs }, (_, pair) => [
+          { pair, color: pair }, { pair, color: pair }
+        ]).flat());
+        memory.matched = new Set(); memory.open = []; memory.flips = 0; memory.turns = 0;
+        memory.locked = false; memory.startedAt = 0; memory.elapsed = 0; memory.statusKey = 'memoryReady';
+        renderMemory();
+      }
+      function startMemoryGame() { memory.level = 1; beginMemoryLevel(); }
+      function updateMemoryCard(index) {
+        const button = $('memory-board').querySelector(`[data-index="${index}"]`);
+        if (!button) return;
+        const card = memory.cards[index];
+        const isMatched = memory.matched.has(card.pair);
+        const isOpen = memory.open.includes(index);
+        button.classList.toggle('revealed', isOpen && !isMatched);
+        button.classList.toggle('matched', isMatched);
+        button.disabled = isMatched;
+        button.replaceChildren();
+        if (isMatched || isOpen) {
+          const swatch = document.createElement('span');
+          swatch.className = 'memory-swatch'; swatch.style.backgroundColor = getMemoryColor(card.color);
+          button.append(swatch);
+        } else {
+          const back = document.createElement('span'); back.className = 'memory-back';
+          for (let i = 0; i < 4; i++) back.append(document.createElement('i'));
+          button.append(back);
+        }
+        const labelKey = isMatched ? 'memoryCardMatched' : isOpen ? 'memoryCardShown' : 'memoryCardHidden';
+        button.setAttribute('aria-label', t(labelKey, { n: index + 1 }));
+      }
+      function renderMemory() {
+        $('memory-level').textContent = t('level', { n: memory.level });
+        $('memory-clock').textContent = formatTime(memoryElapsed());
+        $('memory-pairs').textContent = t('memoryPairs', { n: memory.pairs });
+        $('memory-turns').textContent = t('memoryTurns', { n: memory.turns });
+        $('memory-flips').textContent = String(memory.flips);
+        $('memory-matched').textContent = `${memory.matched.size} / ${memory.pairs}`;
+        const board = $('memory-board');
+        board.style.setProperty('--memory-columns', getMemoryColumns(memory.pairs));
+        board.style.setProperty('--memory-columns-mobile', Math.min(getMemoryColumns(memory.pairs), 5));
+        board.classList.toggle('locked', memory.locked);
+        board.setAttribute('aria-label', t('memoryCardsAria'));
+        board.replaceChildren();
+        memory.cards.forEach((_, index) => {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = 'memory-card'; button.dataset.index = String(index);
+          button.addEventListener('click', () => revealMemoryCard(index));
+          board.append(button);
+          updateMemoryCard(index);
+        });
+        const status = $('memory-status');
+        status.textContent = t(memory.statusKey);
+        status.className = `status${memory.statusKey === 'memoryWin' ? ' good' : ''}`;
+      }
+      function revealMemoryCard(index) {
+        if (memory.locked || memory.matched.has(memory.cards[index].pair) || memory.open.includes(index)) return;
+        startMemoryClock();
+        memory.open.push(index); memory.flips++;
+        updateMemoryCard(index);
+        if (memory.open.length < 2) {
+          memory.statusKey = 'memoryNeedPair';
+          $('memory-status').textContent = t(memory.statusKey);
+          $('memory-flips').textContent = String(memory.flips);
+          return;
+        }
+        memory.turns++;
+        memory.locked = true;
+        $('memory-board').classList.add('locked');
+        $('memory-turns').textContent = t('memoryTurns', { n: memory.turns });
+        $('memory-flips').textContent = String(memory.flips);
+        const [first, second] = memory.open;
+        if (memory.cards[first].pair === memory.cards[second].pair) {
+          memory.matched.add(memory.cards[first].pair);
+          memory.open = [];
+          memory.locked = false;
+          $('memory-board').classList.remove('locked');
+          memory.statusKey = 'memoryPairGood';
+          updateMemoryCard(first); updateMemoryCard(second);
+          $('memory-matched').textContent = `${memory.matched.size} / ${memory.pairs}`;
+          $('memory-status').textContent = t(memory.statusKey);
+          if (memory.matched.size === memory.pairs) {
+            memory.elapsed = memoryElapsed();
+            memory.startedAt = 0;
+            stopMemoryClock();
+            memory.statusKey = 'memoryWin';
+            $('memory-status').textContent = t(memory.statusKey);
+            memory.locked = true;
+            $('memory-board').classList.add('locked');
+            memory.nextTimer = window.setTimeout(() => { memory.level++; beginMemoryLevel(); }, 1250);
+          }
+        } else {
+          memory.statusKey = 'memoryPairMiss';
+          $('memory-status').textContent = t(memory.statusKey);
+          memory.pendingTimer = window.setTimeout(() => {
+            const opened = [...memory.open];
+            memory.open = []; memory.locked = false; memory.statusKey = 'memoryReady';
+            $('memory-board').classList.remove('locked');
+            opened.forEach(updateMemoryCard);
+            $('memory-status').textContent = t(memory.statusKey);
+          }, 850);
+        }
+      }
+
+      function getSlideSize(level = slide.level) {
+        if (level <= 15) return 3;
+        if (level <= 40) return 4;
+        if (level <= 66) return 5;
+        return 6;
+      }
+      function slideSolved() {
+        return slide.tiles.every((value, index) => value === (index === slide.tiles.length - 1 ? 0 : index + 1));
+      }
+      function slideNeighbors(index, size) {
+        const row = Math.floor(index / size); const column = index % size;
+        const neighbors = [];
+        if (row > 0) neighbors.push(index - size);
+        if (row < size - 1) neighbors.push(index + size);
+        if (column > 0) neighbors.push(index - 1);
+        if (column < size - 1) neighbors.push(index + 1);
+        return neighbors;
+      }
+      function makeSlideShuffle(size) {
+        const count = size * size;
+        const values = Array.from({ length: count }, (_, index) => index === count - 1 ? 0 : index + 1);
+        let blank = count - 1; let previousBlank = -1;
+        const steps = size === 3 ? 70 : size === 4 ? 140 : size === 5 ? 220 : 320;
+        for (let step = 0; step < steps; step++) {
+          let choices = slideNeighbors(blank, size).filter((index) => index !== previousBlank);
+          if (!choices.length) choices = slideNeighbors(blank, size);
+          const next = choices[Math.floor(Math.random() * choices.length)];
+          [values[blank], values[next]] = [values[next], values[blank]];
+          previousBlank = blank; blank = next;
+        }
+        if (values.every((value, index) => value === (index === count - 1 ? 0 : index + 1))) {
+          const next = slideNeighbors(blank, size)[0];
+          [values[blank], values[next]] = [values[next], values[blank]];
+        }
+        return values;
+      }
+      function beginSlideLevel() {
+        window.clearTimeout(slide.nextTimer);
+        stopSlideClock();
+        slide.size = getSlideSize(); slide.tiles = makeSlideShuffle(slide.size);
+        slide.moves = 0; slide.startedAt = 0; slide.elapsed = 0; slide.finished = false; slide.statusKey = 'slideReady';
+        renderSlide();
+      }
+      function startSlideGame() { slide.level = 1; beginSlideLevel(); }
+      function renderSlide() {
+        $('slide-level').textContent = t('level', { n: slide.level });
+        $('slide-clock').textContent = formatTime(slideElapsed());
+        $('slide-size-label').textContent = t('slideBoardSize', { n: slide.size });
+        $('slide-moves').textContent = t('slideMoves', { n: slide.moves });
+        $('slide-move-stat').textContent = String(slide.moves);
+        $('slide-board-stat').textContent = t(`size${slide.size}`);
+        const board = $('slide-board');
+        board.style.setProperty('--slide-size', slide.size);
+        board.setAttribute('aria-label', t('slideBoardSize', { n: slide.size }));
+        board.replaceChildren();
+        slide.tiles.forEach((value, index) => {
+          const tile = document.createElement('button');
+          tile.type = 'button'; tile.className = `slide-tile${value === 0 ? ' empty' : ''}`;
+          tile.textContent = value === 0 ? '' : String(value);
+          tile.disabled = value === 0 || slide.finished;
+          tile.dataset.index = String(index); tile.dataset.tileValue = String(value);
+          tile.setAttribute('aria-label', value === 0 ? (language === 'zh' ? '空格' : 'Empty space') : String(value));
+          tile.addEventListener('click', () => moveSlideTile(index));
+          board.append(tile);
+        });
+        $('slide-status').textContent = t(slide.statusKey);
+      }
+      function moveSlideTile(index) {
+        if (slide.finished) return;
+        const blank = slide.tiles.indexOf(0);
+        if (!slideNeighbors(blank, slide.size).includes(index)) return;
+        if (!slide.startedAt) {
+          slide.startedAt = performance.now();
+          slide.clock = window.setInterval(updateSlideClock, 100);
+        }
+        [slide.tiles[blank], slide.tiles[index]] = [slide.tiles[index], slide.tiles[blank]];
+        slide.moves++;
+        if (slideSolved()) {
+          slide.elapsed = slideElapsed(); slide.startedAt = 0; stopSlideClock();
+          slide.finished = true; slide.statusKey = 'slideSolved';
+          renderSlide();
+          slide.nextTimer = window.setTimeout(() => { slide.level++; beginSlideLevel(); }, 1250);
+        } else renderSlide();
+      }
+
+      function gomokuColorLabel(hex) {
+        const choice = gomokuColors.find((color) => color.hex === hex);
+        return choice?.white ? t('whiteColor') : copy[language].colorNames[choice?.nameIndex ?? 0];
+      }
+      function gomokuLevelFor(skill, gamesPlayed) { return (skill === 'skilled' ? 50 : 1) + gamesPlayed; }
+      function saveGomokuProgress() {
+        try {
+          localStorage.setItem('number-playground-gomoku-profile', JSON.stringify({
+            skill: gomoku.skill, gamesPlayed: gomoku.gamesPlayed,
+            beginnerGames: gomoku.skillGames.beginner, skilledGames: gomoku.skillGames.skilled
+          }));
+        } catch (_) {}
+      }
+      function selectGomokuSkill(skill) {
+        gomoku.skill = skill;
+        gomoku.gamesPlayed = gomoku.skillGames[skill];
+        gomoku.level = gomokuLevelFor(gomoku.skill, gomoku.gamesPlayed);
+        saveGomokuProgress();
+        renderGomokuSetup();
+      }
+      function randomGomokuColor() { return palette[Math.floor(Math.random() * palette.length)].hex; }
+      function chooseGomokuColor(hex) {
+        gomoku.playerColor = hex;
+        gomoku.computerColor = hex === gomokuWhite ? randomGomokuColor() : gomokuWhite;
+        renderGomokuSetup();
+      }
+      function renderGomokuSetup() {
+        const skillOptions = $('gomoku-skill-options'); skillOptions.replaceChildren();
+        ['beginner', 'skilled'].forEach((skill) => {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = `gomoku-skill-choice${gomoku.skill === skill ? ' selected' : ''}`;
+          button.textContent = t(skill === 'beginner' ? 'gomokuBeginner' : 'gomokuSkilled');
+          button.setAttribute('aria-pressed', String(gomoku.skill === skill));
+          button.addEventListener('click', () => selectGomokuSkill(skill));
+          skillOptions.append(button);
+        });
+        $('gomoku-progress-note').textContent = t('gomokuProgress', { plays: gomoku.gamesPlayed, level: gomoku.level });
+        const colors = $('gomoku-colors');
+        colors.setAttribute('aria-label', t('choosePieceColor'));
+        colors.replaceChildren();
+        gomokuColors.forEach((color) => {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = `gomoku-choice${gomoku.playerColor === color.hex ? ' selected' : ''}`;
+          button.setAttribute('aria-pressed', String(gomoku.playerColor === color.hex));
+          button.setAttribute('aria-label', gomokuColorLabel(color.hex));
+          const swatch = document.createElement('span'); swatch.className = 'gomoku-choice-swatch';
+          swatch.style.backgroundColor = color.hex;
+          if (color.white) swatch.style.borderColor = '#aaa89e';
+          const label = document.createElement('span'); label.className = 'gomoku-choice-label'; label.textContent = gomokuColorLabel(color.hex);
+          button.append(swatch, label);
+          button.addEventListener('click', () => chooseGomokuColor(color.hex));
+          colors.append(button);
+        });
+        const matchup = $('gomoku-matchup'); matchup.replaceChildren();
+        const addPreview = (label, hex) => {
+          const group = document.createElement('span'); group.className = 'gomoku-player-preview';
+          const name = document.createElement('span'); name.textContent = label;
+          const stone = document.createElement('i'); stone.className = 'gomoku-preview-stone'; stone.style.backgroundColor = hex;
+          if (hex === gomokuWhite) stone.style.borderColor = '#aaa89e';
+          const colorName = document.createElement('span'); colorName.textContent = gomokuColorLabel(hex);
+          group.append(name, stone, colorName); matchup.append(group);
+        };
+        addPreview(t('yourPiece'), gomoku.playerColor);
+        const vs = document.createElement('span'); vs.className = 'gomoku-vs'; vs.textContent = t('vs'); matchup.append(vs);
+        addPreview(t('computerPiece'), gomoku.computerColor);
+      }
+      function resetGomokuSetup() {
+        window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0;
+        gomoku.active = false; gomoku.thinking = false; gomoku.over = false; gomoku.cells = [];
+        gomoku.moves = 0; gomoku.winningCells = []; gomoku.statusKey = 'gomokuYourTurn';
+        $('gomoku-setup').hidden = false; $('gomoku-play').hidden = true;
+        renderGomokuSetup();
+      }
+      function startGomokuMatch(levelOverride = null) {
+        window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0;
+        if (gomoku.playerColor === gomokuWhite && gomoku.computerColor === gomokuWhite) gomoku.computerColor = randomGomokuColor();
+        gomoku.level = gomokuLevelFor(gomoku.skill, gomoku.gamesPlayed);
+        gomoku.matchLevel = levelOverride ?? gomoku.level;
+        gomoku.resultRecorded = false;
+        gomoku.cells = Array(225).fill(null); gomoku.active = true; gomoku.thinking = false;
+        gomoku.over = false; gomoku.moves = 0; gomoku.winningCells = []; gomoku.statusKey = 'gomokuYourTurn';
+        $('gomoku-setup').hidden = true; $('gomoku-play').hidden = false;
+        renderGomokuBoard();
+      }
+      function gomokuLine(index, side) {
+        const row = Math.floor(index / 15); const col = index % 15;
+        for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+          const line = [index];
+          for (const sign of [-1, 1]) {
+            let r = row + dr * sign; let c = col + dc * sign;
+            while (r >= 0 && r < 15 && c >= 0 && c < 15 && gomoku.cells[r * 15 + c] === side) {
+              if (sign < 0) line.unshift(r * 15 + c); else line.push(r * 15 + c);
+              r += dr * sign; c += dc * sign;
+            }
+          }
+          if (line.length >= 5) return line.slice(Math.max(0, Math.floor((line.length - 5) / 2)), Math.max(0, Math.floor((line.length - 5) / 2)) + 5);
+        }
+        return null;
+      }
+      function renderGomokuBoard() {
+        const board = $('gomoku-board'); board.replaceChildren(); board.setAttribute('aria-label', t('gomokuBoardAria'));
+        $('gomoku-level-label').textContent = t('level', { n: gomoku.matchLevel });
+        const currentColor = gomoku.thinking || (gomoku.over && gomoku.statusKey === 'gomokuComputerWins') ? gomoku.computerColor : gomoku.playerColor;
+        $('gomoku-turn-dot').style.backgroundColor = currentColor;
+        if (currentColor === gomokuWhite) $('gomoku-turn-dot').style.borderColor = '#aaa89e';
+        else $('gomoku-turn-dot').style.borderColor = 'rgba(75,72,64,.2)';
+        $('gomoku-turn-label').textContent = t(gomoku.statusKey);
+        $('gomoku-move-label').textContent = t('gomokuMoves', { n: gomoku.moves });
+        const nextRound = $('gomoku-next-round');
+        nextRound.hidden = !gomoku.over;
+        nextRound.textContent = t('gomokuNextRound', { n: gomoku.level });
+        for (let index = 0; index < 225; index++) {
+          const row = Math.floor(index / 15); const col = index % 15; const side = gomoku.cells[index];
+          const cell = document.createElement('button');
+          cell.type = 'button'; cell.className = 'gomoku-cell';
+          cell.disabled = !gomoku.active || gomoku.over || gomoku.thinking || side !== null;
+          const isStar = [3, 7, 11].includes(row) && [3, 7, 11].includes(col);
+          if (side === null && isStar) { const star = document.createElement('span'); star.className = 'gomoku-star-dot'; cell.append(star); }
+          if (side) {
+            const stone = document.createElement('span'); stone.className = 'gomoku-stone';
+            const color = side === 'player' ? gomoku.playerColor : gomoku.computerColor;
+            stone.style.backgroundColor = color;
+            if (color === gomokuWhite) stone.classList.add('white');
+            if (gomoku.winningCells.includes(index)) stone.classList.add('winning');
+            cell.append(stone);
+          }
+          const labelKey = side === 'player' ? 'gomokuPlayerCell' : side === 'computer' ? 'gomokuComputerCell' : 'gomokuEmptyCell';
+          cell.setAttribute('aria-label', t(labelKey, { row: row + 1, col: col + 1 }));
+          cell.addEventListener('click', () => playGomokuAt(index));
+          board.append(cell);
+        }
+        $('gomoku-status').textContent = t(gomoku.statusKey);
+      }
+      function finishGomokuMatch(statusKey, winningLine = []) {
+        if (gomoku.over) return;
+        gomoku.over = true; gomoku.thinking = false; gomoku.statusKey = statusKey; gomoku.winningCells = winningLine;
+        if (!gomoku.resultRecorded) {
+          gomoku.gamesPlayed++;
+          gomoku.skillGames[gomoku.skill] = gomoku.gamesPlayed;
+          gomoku.level = gomokuLevelFor(gomoku.skill, gomoku.gamesPlayed);
+          gomoku.resultRecorded = true;
+          saveGomokuProgress();
+        }
+        renderGomokuBoard();
+      }
+      function playGomokuAt(index) {
+        if (!gomoku.active || gomoku.over || gomoku.thinking || gomoku.cells[index] !== null) return;
+        gomoku.cells[index] = 'player'; gomoku.moves++;
+        const winningLine = gomokuLine(index, 'player');
+        if (winningLine) {
+          finishGomokuMatch('gomokuYouWin', winningLine); return;
+        }
+        if (gomoku.moves >= 225) {
+          finishGomokuMatch('gomokuDraw'); return;
+        }
+        gomoku.thinking = true; gomoku.statusKey = 'gomokuComputerTurn'; renderGomokuBoard();
+        gomoku.aiTimer = window.setTimeout(playComputerGomoku, 430);
+      }
+      function gomokuMoveScore(index, side) {
+        if (gomoku.cells[index] !== null) return 0;
+        gomoku.cells[index] = side;
+        const row = Math.floor(index / 15); const col = index % 15;
+        let total = 0;
+        for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+          let count = 1; let openEnds = 0;
+          for (const sign of [-1, 1]) {
+            let r = row + dr * sign; let c = col + dc * sign;
+            while (r >= 0 && r < 15 && c >= 0 && c < 15 && gomoku.cells[r * 15 + c] === side) {
+              count++; r += dr * sign; c += dc * sign;
+            }
+            if (r >= 0 && r < 15 && c >= 0 && c < 15 && gomoku.cells[r * 15 + c] === null) openEnds++;
+          }
+          if (count >= 5) total += 1000000000;
+          else if (count === 4) total += openEnds === 2 ? 180000 : openEnds === 1 ? 75000 : 0;
+          else if (count === 3) total += openEnds === 2 ? 8000 : openEnds === 1 ? 800 : 0;
+          else if (count === 2) total += openEnds === 2 ? 350 : openEnds === 1 ? 40 : 0;
+          else if (count === 1 && openEnds === 2) total += 10;
+        }
+        gomoku.cells[index] = null;
+        return total;
+      }
+      function chooseComputerGomokuMove() {
+        const occupied = gomoku.cells.reduce((list, side, index) => { if (side) list.push(index); return list; }, []);
+        if (!occupied.length) return 112;
+        const candidates = [];
+        for (let index = 0; index < 225; index++) {
+          if (gomoku.cells[index] !== null) continue;
+          const row = Math.floor(index / 15); const col = index % 15;
+          const nearby = occupied.some((stone) => Math.abs(Math.floor(stone / 15) - row) <= 2 && Math.abs(stone % 15 - col) <= 2);
+          if (nearby) candidates.push(index);
+        }
+        if (!candidates.length) return 112;
+        for (const index of candidates) if (gomokuMoveScore(index, 'computer') >= 1000000000) return index;
+        for (const index of candidates) if (gomokuMoveScore(index, 'player') >= 1000000000) return index;
+        const difficulty = Math.min(15, Math.max(1, gomoku.matchLevel || 1));
+        const defenseWeight = .95 + difficulty / 50;
+        const scored = candidates.map((index) => {
+          const row = Math.floor(index / 15); const col = index % 15;
+          const centerBonus = (14 - Math.abs(7 - row) - Math.abs(7 - col)) * .35;
+          const score = gomokuMoveScore(index, 'computer') + gomokuMoveScore(index, 'player') * defenseWeight + centerBonus + Math.random() * (6 - difficulty / 3);
+          return { index, score, adjusted: score };
+        }).sort((a, b) => b.score - a.score);
+        if (difficulty >= 7) {
+          const lookaheadWeight = ((difficulty - 6) / 9) * .75;
+          const examined = scored.slice(0, Math.min(difficulty >= 13 ? 18 : 12, scored.length));
+          examined.forEach((candidate) => {
+            gomoku.cells[candidate.index] = 'computer';
+            let opponentBest = 0;
+            for (const response of candidates) {
+              if (response === candidate.index || gomoku.cells[response] !== null) continue;
+              opponentBest = Math.max(opponentBest, gomokuMoveScore(response, 'player'));
+            }
+            gomoku.cells[candidate.index] = null;
+            candidate.adjusted = candidate.score - opponentBest * lookaheadWeight;
+          });
+        }
+        scored.sort((a, b) => b.adjusted - a.adjusted);
+        const poolSize = Math.max(1, 5 - Math.floor((difficulty - 1) / 3));
+        return scored[Math.floor(Math.random() * Math.min(poolSize, scored.length))].index;
+      }
+      function playComputerGomoku() {
+        gomoku.aiTimer = 0;
+        if (!gomoku.active || gomoku.over) return;
+        const index = chooseComputerGomokuMove();
+        if (index < 0) { finishGomokuMatch('gomokuDraw'); return; }
+        gomoku.cells[index] = 'computer'; gomoku.moves++; gomoku.thinking = false;
+        const winningLine = gomokuLine(index, 'computer');
+        if (winningLine) {
+          finishGomokuMatch('gomokuComputerWins', winningLine); return;
+        } else if (gomoku.moves >= 225) {
+          finishGomokuMatch('gomokuDraw'); return;
+        } else gomoku.statusKey = 'gomokuYourTurn';
+        renderGomokuBoard();
+      }
+
+      function stopStroopClock() {
+        if (stroop.clock) window.clearInterval(stroop.clock);
+        stroop.clock = 0;
+      }
+      function stroopElapsed() { return stroop.startedAt ? performance.now() - stroop.startedAt : stroop.elapsed; }
+      function updateStroopClock() { if (activeGame === 'stroop' && !stroop.finished) $('stroop-clock').textContent = formatTime(stroopElapsed()); }
+      function prepareStroopGame() {
+        stopStroopClock(); stroop.level = 1; stroop.colorOrder = []; stroop.questions = [];
+        stroop.index = 0; stroop.correct = 0; stroop.wrong = 0; stroop.startedAt = 0; stroop.elapsed = 0;
+        stroop.started = false; stroop.finished = false;
+        renderStroop();
+      }
+      function beginStroopRound() {
+        stopStroopClock();
+        const domain = Math.min(stroopColors.length, 4 + Math.floor(stroop.level / 5));
+        const availableColors = stroop.colorOrder.slice(0, domain);
+        const recentPairs = [];
+        stroop.questions = Array.from({ length: 10 }, () => {
+          const pairs = [];
+          availableColors.forEach((meaning) => availableColors.forEach((ink) => {
+            if (meaning === ink) return;
+            const signature = [meaning, ink].sort((a, b) => a - b).join(':');
+            if (recentPairs.includes(signature)) return;
+            pairs.push({ meaning, ink, signature });
+          }));
+          const chosen = pairs[Math.floor(Math.random() * pairs.length)];
+          recentPairs.push(chosen.signature);
+          if (recentPairs.length > 2) recentPairs.shift();
+          return { meaning: chosen.meaning, ink: chosen.ink, options: shuffle([chosen.meaning, chosen.ink]) };
+        });
+        stroop.index = 0; stroop.correct = 0; stroop.wrong = 0; stroop.elapsed = 0;
+        stroop.startedAt = performance.now(); stroop.finished = false;
+        stroop.clock = window.setInterval(updateStroopClock, 100);
+        $('stroop-round-view').hidden = false; $('stroop-results').hidden = true;
+        renderStroop();
+      }
+      function startStroopGame() {
+        stroop.level = 1;
+        stroop.colorOrder = [0, 2, 3, 1, ...shuffle(Array.from({ length: stroopColors.length - 4 }, (_, index) => index + 4))];
+        stroop.started = true;
+        beginStroopRound();
+      }
+      function renderStroop() {
+        $('stroop-ready').hidden = stroop.started;
+        $('stroop-round-view').hidden = !stroop.started || stroop.finished;
+        $('stroop-results').hidden = !stroop.started || !stroop.finished;
+        if (!stroop.started) return;
+        $('stroop-level').textContent = t('level', { n: stroop.level });
+        $('stroop-clock').textContent = formatTime(stroopElapsed());
+        if (stroop.finished) {
+          $('stroop-result-level').textContent = t('roundResult', { n: stroop.level });
+          $('stroop-result-correct').textContent = String(stroop.correct);
+          $('stroop-result-wrong').textContent = String(stroop.wrong);
+          $('stroop-result-time').textContent = formatTime(stroop.elapsed);
+          return;
+        }
+        const question = stroop.questions[stroop.index];
+        if (!question) return;
+        $('stroop-question-count').textContent = t('questionNumber', { n: stroop.index + 1 });
+        $('stroop-correct').textContent = String(stroop.correct);
+        $('stroop-wrong').textContent = String(stroop.wrong);
+        const glyph = $('stroop-question');
+        glyph.textContent = language === 'zh' ? stroopColors[question.meaning].zh : stroopColors[question.meaning].enLetter;
+        glyph.style.color = stroopColors[question.ink].hex;
+        glyph.classList.toggle('white-ink', Boolean(stroopColors[question.ink].white));
+        const options = $('stroop-options'); options.replaceChildren();
+        options.setAttribute('aria-label', t('stroopOptionsAria'));
+        question.options.forEach((colorIndex) => {
+          const color = stroopColors[colorIndex];
+          const button = document.createElement('button'); button.type = 'button'; button.className = 'stroop-option';
+          const label = document.createElement('span'); label.textContent = language === 'zh' ? color.zh : color.enName;
+          button.setAttribute('aria-label', label.textContent);
+          button.append(label);
+          button.addEventListener('click', () => answerStroop(colorIndex));
+          options.append(button);
+        });
+      }
+      function answerStroop(colorIndex) {
+        if (stroop.finished) return;
+        const question = stroop.questions[stroop.index];
+        if (colorIndex === question.ink) stroop.correct++;
+        else stroop.wrong++;
+        stroop.index++;
+        if (stroop.index >= 10) {
+          stroop.elapsed = stroopElapsed(); stroop.startedAt = 0; stroop.finished = true;
+          stopStroopClock(); renderStroop();
+        } else renderStroop();
+      }
+      function advanceStroopLevel() { stroop.level++; beginStroopRound(); }
+
+      function getDomain() {
+        const difficultyStage = Math.floor((password.level - 1) / 8);
+        return password.mode === 'number' ? 10 : Math.min(palette.length, 4 + difficultyStage);
+      }
+      function getClueMatchCount() {
+        return password.mode === 'number' ? Math.max(0, 2 - Math.floor((password.level - 1) / 8)) : 2;
+      }
+      function getClue(length) {
+        if (password.mode === 'number') return Array.from({ length }, () => String(Math.floor(Math.random() * 10)));
+        return shuffle(Array.from({ length: getDomain() }, (_, i) => i)).slice(0, length);
+      }
+      function makeTarget(clue) {
+        const size = clue.length;
+        const domain = getDomain();
+        const matchesNeeded = getClueMatchCount();
+        if (password.mode === 'color') {
+          let candidate = [];
+          do { candidate = shuffle(Array.from({ length: domain }, (_, i) => i)).slice(0, size); }
+          while (countMatches(candidate, clue) !== matchesNeeded);
+          return candidate;
+        }
+        const matchingPositions = new Set(shuffle(Array.from({ length: size }, (_, i) => i)).slice(0, matchesNeeded));
+        return clue.map((value, i) => {
+          if (matchingPositions.has(i)) return value;
+          let pick = Math.floor(Math.random() * domain);
+          while (password.mode === 'number' ? String(pick) === value : pick === value) pick = Math.floor(Math.random() * domain);
+          return password.mode === 'number' ? String(pick) : pick;
+        });
+      }
+      function countMatches(guess, target) { return guess.reduce((count, value, i) => count + (value === target[i] ? 1 : 0), 0); }
+      function correctText(n) { return t('correct', { n }); }
+      function colorLabel(index) { return copy[language].colorNames[index]; }
+      function addSequenceItem(container, value, mode, className = '') {
+        const item = document.createElement('span');
+        if (mode === 'number') {
+          item.className = `sequence-number ${className}`.trim();
+          item.textContent = value;
+        } else {
+          item.className = `sequence-color ${className}`.trim();
+          item.style.backgroundColor = palette[value].hex;
+          item.setAttribute('aria-label', colorLabel(value));
+          item.title = colorLabel(value);
+        }
+        container.append(item);
+      }
+      function beginPasswordLevel() {
+        window.clearTimeout(password.nextTimer);
+        password.length = 4;
+        const clue = getClue(password.length);
+        password.target = makeTarget(clue);
+        password.clue = clue;
+        password.clueCount = countMatches(clue, password.target);
+        password.guess = password.mode === 'color' ? Array(password.length).fill(null) : [];
+        password.jumpBackIndex = -1;
+        password.history = [];
+        password.locked = false;
+        password.helpKey = 'initialHelp'; password.helpParams = {};
+        renderPassword();
+      }
+      function startPasswordGame(mode) {
+        window.clearTimeout(password.nextTimer);
+        password.mode = mode;
+        password.level = 1;
+        password.length = 4;
+        beginPasswordLevel();
+      }
+      function setPasswordHelp(key, params = {}) { password.helpKey = key; password.helpParams = params; }
+      function passwordGuessCount() {
+        return password.mode === 'color'
+          ? password.guess.filter((value) => value !== null && value !== undefined).length
+          : password.guess.length;
+      }
+      function removeLastPasswordValue() {
+        if (password.locked || !passwordGuessCount()) return;
+        if (password.mode === 'color') {
+          for (let i = password.guess.length - 1; i >= 0; i--) {
+            if (password.guess[i] !== null && password.guess[i] !== undefined) { password.guess[i] = null; break; }
+          }
+        } else password.guess.pop();
+        password.jumpBackIndex = -1;
+        const count = passwordGuessCount();
+        setPasswordHelp(count ? 'enterMore' : 'initialHelp', { n: password.length - count });
+        renderPassword();
+      }
+      function renderPassword() {
+        const mode = password.mode;
+        if (!mode) return;
+        $('level-label').textContent = t('level', { n: password.level });
+        $('attempt-note').textContent = t('guesses', { n: password.history.length });
+        $('progress-dots').replaceChildren();
+        const stageProgress = ((password.level - 1) % 8) + 1;
+        for (let i = 0; i < 8; i++) {
+          const dot = document.createElement('i'); if (i < stageProgress) dot.classList.add('on'); $('progress-dots').append(dot);
+        }
+        const clueSequence = $('clue-sequence'); clueSequence.replaceChildren();
+        password.clue.forEach((value) => addSequenceItem(clueSequence, value, mode));
+        $('clue-result').textContent = correctText(password.clueCount);
+        $('rule-note').textContent = t(mode === 'number' ? 'numberRule' : 'colorRule');
+        const slots = $('slots'); slots.style.setProperty('--code-length', password.length); slots.replaceChildren();
+        for (let i = 0; i < password.length; i++) {
+          const slot = document.createElement('span');
+          if (password.guess[i] === undefined || password.guess[i] === null) { slot.className = `slot empty${password.jumpBackIndex === i ? ' repick' : ''}`; slot.textContent = '·'; }
+          else { slot.className = 'slot'; addSequenceItem(slot, password.guess[i], mode); }
+          slots.append(slot);
+        }
+        $('code-help').textContent = t(password.helpKey, password.helpParams);
+        $('code-help').className = `code-help${password.helpKey.startsWith('solved') ? ' good' : ''}`;
+        const keypad = $('keypad'); keypad.replaceChildren();
+        if (mode === 'number') {
+          keypad.className = 'keypad';
+          for (let i = 0; i <= 9; i++) {
+            const key = document.createElement('button'); key.type = 'button'; key.className = 'key'; key.textContent = i;
+            key.setAttribute('aria-label', String(i)); key.disabled = password.locked || passwordGuessCount() >= password.length;
+            key.addEventListener('click', () => appendPasswordValue(String(i))); keypad.append(key);
+          }
+        } else {
+          keypad.className = 'color-keypad';
+          palette.slice(0, getDomain()).forEach((color, i) => {
+            const key = document.createElement('button'); key.type = 'button'; key.className = 'color-key';
+            key.innerHTML = `<span class="color-chip" style="background:${color.hex}"></span><span>${colorLabel(i)}</span>`;
+            key.setAttribute('aria-label', colorLabel(i)); key.disabled = password.locked || passwordGuessCount() >= password.length;
+            key.addEventListener('click', () => appendPasswordValue(i)); keypad.append(key);
+          });
+        }
+        const submit = $('submit-guess'); submit.disabled = password.locked || passwordGuessCount() !== password.length; submit.style.opacity = submit.disabled ? '.55' : '1';
+        const del = $('delete-digit'); del.disabled = password.locked || passwordGuessCount() === 0; del.style.opacity = del.disabled ? '.5' : '1';
+        del.setAttribute('aria-label', language === 'zh' ? '删除最后一个' : 'Delete last item');
+        const history = $('history'); history.replaceChildren();
+        if (!password.history.length) {
+          const empty = document.createElement('div'); empty.className = 'history-empty'; empty.textContent = t('noHistory'); history.append(empty);
+        } else {
+          password.history.forEach((entry) => {
+            const row = document.createElement('div'); row.className = 'guess-row';
+            const sequence = document.createElement('div'); sequence.className = 'guess-digits';
+            entry.values.forEach((value) => addSequenceItem(sequence, value, mode));
+            const result = document.createElement('span'); result.className = 'guess-result'; result.textContent = correctText(entry.correct);
+            row.append(sequence, result); history.append(row);
+          });
+        }
+      }
+      function appendPasswordValue(value) {
+        if (password.locked || passwordGuessCount() >= password.length) return;
+        if (password.mode === 'color') {
+          const repeatAt = password.guess.indexOf(value);
+          if (repeatAt !== -1) {
+            password.guess[repeatAt] = null;
+            password.jumpBackIndex = repeatAt;
+            setPasswordHelp('duplicateColor', { n: repeatAt + 1 });
+            renderPassword();
+            return;
+          }
+          const emptyAt = password.jumpBackIndex >= 0 && password.guess[password.jumpBackIndex] == null
+            ? password.jumpBackIndex
+            : password.guess.findIndex((item) => item === null || item === undefined);
+          if (emptyAt === -1) return;
+          password.guess[emptyAt] = value;
+        } else {
+          password.guess.push(value);
+        }
+        password.jumpBackIndex = -1;
+        const count = passwordGuessCount();
+        setPasswordHelp(count === password.length ? 'readySubmit' : 'enterMore', { n: password.length - count });
+        renderPassword();
+      }
+      function submitPasswordGuess() {
+        if (password.locked || passwordGuessCount() !== password.length) return;
+        const values = [...password.guess];
+        const correct = countMatches(values, password.target);
+        password.history.unshift({ values, correct });
+        if (correct === password.length) {
+          password.locked = true;
+          setPasswordHelp('solvedNext');
+          renderPassword();
+          password.nextTimer = window.setTimeout(() => { password.level++; beginPasswordLevel(); }, 1300);
+        } else {
+          password.guess = password.mode === 'color' ? Array(password.length).fill(null) : []; password.jumpBackIndex = -1;
+          setPasswordHelp('afterGuess');
+          renderPassword();
+        }
+      }
+      function openGame(id) {
+        window.clearTimeout(password.nextTimer);
+        window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock();
+        window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0; stopStroopClock();
+        activeGame = id;
+        homeView.hidden = true; gameView.hidden = false;
+        speedPanel.hidden = id !== 'speed';
+        passwordPanel.hidden = id !== 'number' && id !== 'color';
+        memoryPanel.hidden = id !== 'memory'; slidePanel.hidden = id !== 'slide';
+        gomokuPanel.hidden = id !== 'gomoku';
+        stroopPanel.hidden = id !== 'stroop';
+        renderGameHeading();
+        if (id === 'speed') prepareSpeedGame();
+        else if (id === 'number' || id === 'color') startPasswordGame(id);
+        else if (id === 'memory') startMemoryGame();
+        else if (id === 'slide') startSlideGame();
+        else if (id === 'gomoku') resetGomokuSetup();
+        else if (id === 'stroop') prepareStroopGame();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function goHome() {
+        window.clearTimeout(password.nextTimer);
+        window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
+        window.clearTimeout(slide.nextTimer); stopSlideClock(); stopSpeedClock(); stopStroopClock();
+        resetGomokuSetup(); activeGame = '';
+        gameView.hidden = true; homeView.hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function restartGomokuMatch() {
+        if (gomoku.active || gomoku.over) startGomokuMatch(gomoku.matchLevel);
+        else startGomokuMatch();
+      }
+      function restartActiveGame() {
+        if (activeGame === 'speed') prepareSpeedGame();
+        else if (activeGame === 'number' || activeGame === 'color') beginPasswordLevel();
+        else if (activeGame === 'memory') beginMemoryLevel();
+        else if (activeGame === 'slide') beginSlideLevel();
+        else if (activeGame === 'gomoku') restartGomokuMatch();
+        else if (activeGame === 'stroop') { if (stroop.started) beginStroopRound(); else prepareStroopGame(); }
+      }
+      document.querySelectorAll('[data-game]').forEach((button) => button.addEventListener('click', () => openGame(button.dataset.game)));
+      $('brand-home').addEventListener('click', goHome);
+      $('back-home').addEventListener('click', goHome);
+      $('restart-game').addEventListener('click', restartActiveGame);
+      $('restart-speed').addEventListener('click', prepareSpeedGame);
+      $('speed-start').addEventListener('click', startSpeedGame);
+      $('speed-result-replay').addEventListener('click', () => { prepareSpeedGame(); $('speed-start').focus(); });
+      $('speed-result-home').addEventListener('click', goHome);
+      $('gomoku-start').addEventListener('click', startGomokuMatch);
+      $('gomoku-change-color').addEventListener('click', resetGomokuSetup);
+      $('gomoku-next-round').addEventListener('click', startGomokuMatch);
+      $('stroop-replay').addEventListener('click', beginStroopRound);
+      $('stroop-start').addEventListener('click', startStroopGame);
+      $('stroop-next').addEventListener('click', advanceStroopLevel);
+      $('submit-guess').addEventListener('click', submitPasswordGuess);
+      $('delete-digit').addEventListener('click', removeLastPasswordValue);
+      $('lang-zh').addEventListener('click', () => setLanguage('zh'));
+      $('lang-en').addEventListener('click', () => setLanguage('en'));
+      document.addEventListener('keydown', (event) => {
+        if (activeGame === 'number' && /^[0-9]$/.test(event.key)) appendPasswordValue(event.key);
+        else if ((activeGame === 'number' || activeGame === 'color') && event.key === 'Backspace') {
+          removeLastPasswordValue();
+        } else if ((activeGame === 'number' || activeGame === 'color') && event.key === 'Enter') submitPasswordGuess();
+      });
+      updateStaticCopy();
+    })();
+  </script>
+</body>
+</html>
