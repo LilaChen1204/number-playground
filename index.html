@@ -1662,7 +1662,7 @@
         ];
         return layout.map((block, index) => {
           if (block.target) return block;
-          const colorIndex = (index - 1) % colorSlideCarPalette.length;
+          const colorIndex = 1 + (index - 1) % (colorSlideCarPalette.length - 1);
           return { ...block, id: 'block-' + index, colorIndex, color: colorSlideCarPalette[colorIndex], target: false };
         });
       }
