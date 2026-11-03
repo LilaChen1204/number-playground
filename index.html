@@ -74,6 +74,7 @@
     .launch-card.speed .orb-area { border-color: #e7eadf; background: #f3f4ee; }
     .launch-card.number .orb-area { border-color: #e4dbe9; background: #f2edf4; }
     .launch-card.memory .orb-area { border-color: #ead9d4; background: #f7eeeb; }
+    .launch-card.colorfind .orb-area { border-color: #dce5d9; background: #eff3ed; }
     .launch-card.slide .orb-area { border-color: #dce5e8; background: #edf3f4; }
     .launch-card.colorslide .orb-area { border-color: #e7ddd2; background: #f5eee7; }
     .launch-card.gomoku .orb-area { border-color: #e6dfd0; background: #f4f0e6; }
@@ -94,6 +95,9 @@
     .memory-symbol i:nth-child(2) { background: #d0a17c; }
     .memory-symbol i:nth-child(3) { background: #d1c080; }
     .memory-symbol i:nth-child(4) { background: #93aa7e; }
+    .colorfind-symbol { display: grid; grid-template-columns: repeat(4, 5px); gap: 2px; }
+    .colorfind-symbol i { width: 5px; height: 5px; border-radius: 1px; background: #93aa7e; }
+    .colorfind-symbol i:nth-child(7) { background: #a9b994; }
     .slide-symbol { display: grid; grid-template-columns: repeat(3, 8px); gap: 2px; }
     .slide-symbol i { display: grid; width: 8px; height: 8px; place-items: center; border-radius: 2px; color: #71868b; background: #d7e4e5; font-size: 5px; font-style: normal; font-weight: 850; }
     .slide-symbol i:last-child { background: #fff; }
@@ -225,6 +229,11 @@
     .memory-card.revealed { border-color: #e1cec6; background: #fbf5f2; }
     .memory-card.matched { border-color: #cddacf; background: #eef3ed; cursor: default; }
     .memory-card.matched .memory-swatch { box-shadow: 0 0 0 3px rgba(143,168,145,.15); }
+    .colorfind-board { width: min(100%, 540px); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); aspect-ratio: 1; gap: 2px; margin: 0 auto; padding: 7px; border: 1px solid #e6e2da; border-radius: 15px; background: #f4f1eb; }
+    .colorfind-tile { min-width: 0; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.72); border-radius: 5px; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+    .colorfind-tile:hover:not(:disabled) { z-index: 1; transform: scale(.96); box-shadow: 0 2px 7px rgba(58,60,55,.18); }
+    .colorfind-tile:disabled { cursor: default; }
+    .colorfind-tile.wrong { animation: nudge .25s ease; }
     .sliding-board { width: min(100%, 610px); grid-template-columns: repeat(var(--slide-size, 3), minmax(0, 1fr)); aspect-ratio: 1; gap: clamp(4px, 1vw, 8px); margin: 0 auto; padding: clamp(7px, 1.4vw, 12px); border-radius: 17px; background: #edf2f1; }
     .color-slide-card { max-width: 810px; }
     .color-slide-play { display: grid; gap: 17px; }
@@ -409,7 +418,7 @@
       .game-heading h1 { font-size: 21px; line-height: 1.1; }
       .game-heading p { margin-top: 3px; font-size: 9px; line-height: 1.25; }
       .game-card { max-width: 900px; padding: 9px; border-radius: 15px; }
-      #speed-panel #speed-play:not([hidden]), #memory-panel, #slide-panel, #gomoku-play:not([hidden]) {
+      #speed-panel #speed-play:not([hidden]), #memory-panel, #colorfind-panel, #slide-panel, #gomoku-play:not([hidden]) {
         display: grid; grid-template-columns: min(60vh, 45vw) minmax(0, 1fr); column-gap: clamp(10px, 2vw, 22px); align-items: center;
       }
       #speed-panel #speed-play:not([hidden]) { grid-template-rows: auto 1fr auto auto; row-gap: 5px; }
@@ -430,6 +439,12 @@
       #memory-panel .game-foot, #slide-panel .game-foot { grid-column: 2; grid-row: 3; margin: 0; }
       #memory-panel .stats, #slide-panel .stats { grid-column: 2; grid-row: 4; margin: 0; }
       #memory-panel .stat, #slide-panel .stat { padding: 5px 6px; }
+      #colorfind-panel { max-width: 900px; grid-template-columns: min(60vh, 45vw) minmax(0, 1fr); grid-template-rows: auto auto 1fr auto; column-gap: clamp(10px, 2vw, 22px); row-gap: 5px; align-items: center; }
+      #colorfind-panel .colorfind-board { width: 100%; grid-column: 1; grid-row: 1 / 5; gap: 2px; padding: 6px; }
+      #colorfind-panel .puzzle-topline { grid-column: 2; grid-row: 1; margin: 0; }
+      #colorfind-panel .board-info { grid-column: 2; grid-row: 2; margin: 0; }
+      #colorfind-panel .game-foot { grid-column: 2; grid-row: 3; margin: 0; }
+      #colorfind-panel .stats { grid-column: 2; grid-row: 4; margin: 0; }
       #slide-panel { grid-template-rows: auto auto 1fr auto; row-gap: 4px; }
       #slide-panel .sliding-board { width: 100%; grid-column: 1; grid-row: 1 / 5; gap: 4px; padding: 6px; }
       #slide-panel .puzzle-foot, #slide-panel .puzzle-stats { margin: 0; }
@@ -540,6 +555,12 @@
           <span class="orb-area" aria-hidden="true"><span class="game-symbol memory-symbol"><i></i><i></i><i></i><i></i></span></span>
           <span class="launch-title" data-i18n="memoryTitle">颜色记忆</span>
           <span class="launch-copy" data-i18n="memoryCardCopy">翻开卡牌，找出相同颜色的配对</span>
+          <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
+        </button>
+        <button class="launch-card colorfind" type="button" data-game="colorfind">
+          <span class="orb-area" aria-hidden="true"><span class="game-symbol colorfind-symbol"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+          <span class="launch-title" data-i18n="colorFindTitle">颜色找不同</span>
+          <span class="launch-copy" data-i18n="colorFindCardCopy">找出16个色块中唯一不同的颜色</span>
           <span class="launch-bottom" aria-hidden="true"><span class="launch-arrow">→</span></span>
         </button>
         <button class="launch-card slide" type="button" data-game="slide">
@@ -669,6 +690,23 @@
         <div class="stats puzzle-stats" data-i18n-aria="memoryStatsAria">
           <div class="stat"><span class="stat-label" data-i18n="memoryFlips">翻牌次数</span><span class="stat-value" id="memory-flips">0</span></div>
           <div class="stat"><span class="stat-label" data-i18n="memoryMatched">已配对</span><span class="stat-value" id="memory-matched">0 / 6</span></div>
+        </div>
+      </article>
+
+      <article class="game-card puzzle-card" id="colorfind-panel" hidden>
+        <div class="puzzle-topline">
+          <span class="puzzle-level"><span aria-hidden="true">✦</span><span id="colorfind-level"></span></span>
+          <span class="puzzle-clock" id="colorfind-clock">00:00.0</span>
+        </div>
+        <div class="board-info">
+          <span class="next-label" data-i18n="colorFindInstruction">找出4×4方格里唯一不同的色块</span>
+          <span class="attempt-note" id="colorfind-mistakes"></span>
+        </div>
+        <div class="puzzle-board colorfind-board" id="colorfind-board" role="group"></div>
+        <div class="game-foot puzzle-foot"><div class="status" id="colorfind-status" aria-live="polite"></div></div>
+        <div class="stats puzzle-stats" data-i18n-aria="colorFindStatsAria">
+          <div class="stat"><span class="stat-label" data-i18n="colorFindCorrectLabel">连续找对</span><span class="stat-value" id="colorfind-correct">0</span></div>
+          <div class="stat"><span class="stat-label" data-i18n="colorFindDifficultyLabel">颜色差异</span><span class="stat-value" id="colorfind-difficulty">明显</span></div>
         </div>
       </article>
 
@@ -812,13 +850,15 @@
           homeCopy: '每天十分钟，大脑更轻松', speedTitle: '舒尔特方格', speedCardCopy: '依次点击 1 到 25，时间越短越好',
           numberTitle: '破译密码', numberCardCopy: '密码始终为四位数，可重复', colorTitle: '颜色推理',
           colorCardCopy: '排列颜色，不可重复', playNow: '开始玩', footer: 'By Lila Chen · 吉',
-          memoryTitle: '颜色记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', slideTitle: '数字滑块', slideCardCopy: '移动方块，把数字从小到大排序',
+          memoryTitle: '颜色记忆', memoryCardCopy: '翻开卡牌，找出相同颜色的配对', colorFindTitle: '颜色找不同',
+          colorFindCardCopy: '找出16个色块中唯一不同的颜色', slideTitle: '数字滑块', slideCardCopy: '移动方块，把数字从小到大排序',
           colorSlideTitle: '解救色块', colorSlideCardCopy: '把所有的色块推出场地即可',
           gomokuTitle: '五子棋', gomokuCardCopy: '先将五颗棋子连成一线（横、竖或斜）的一方获胜',
           stroopTitle: '颜色挑战', stroopCardCopy: '请选择字的颜色，不要选字的意思',
           allGames: '所有游戏', restart: '重新开始', speedSubtitle: '依次点击 1 到 25，时间越短越好',
           numberSubtitle: '密码始终四位数；每 8 关，已知提示会更难', colorSubtitle: '始终猜四格；每 8 关增加一种可选颜色',
-          memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', slideSubtitle: '移动方块，把数字从小到大排序',
+          memorySubtitle: '记住颜色的位置，翻开卡牌找出所有配对', colorFindSubtitle: '找出4×4方格里唯一不同的色块',
+          slideSubtitle: '移动方块，把数字从小到大排序',
           colorSlideSubtitle: '把所有的色块推出场地即可',
           colorSlideReadyTitle: '准备好了吗？', colorSlideReadyIntro: '把所有的色块推出场地即可',
           colorSlideInstructions: '沿长边滑动色块，按箭头方向推出边界；红色块要连续用力推出三次', colorSlideMoveLabel: '推动次数',
@@ -848,6 +888,10 @@
           memoryReady: '翻开两张卡牌，找出相同颜色', memoryNeedPair: '再翻一张卡牌', memoryPairGood: '配对成功！继续找',
           memoryPairMiss: '颜色不同，记住它们的位置', memoryWin: '太棒了！马上进入下一关', memoryCardsAria: '颜色配对卡牌',
           memoryCardHidden: '未翻开的卡牌 {n}', memoryCardShown: '已翻开的颜色卡牌 {n}', memoryCardMatched: '已配对的卡牌 {n}',
+          colorFindInstruction: '点击颜色不同的色块', colorFindWrong: '这个颜色相同，再找找不一样的',
+          colorFindRight: '找对了！准备下一关', colorFindMistakes: '误点 {n} 次', colorFindCorrectLabel: '累计找对',
+          colorFindDifficultyLabel: '颜色差异', colorFindStatsAria: '颜色找不同成绩', colorFindBoardAria: '4乘4颜色色块',
+          colorFindObvious: '明显', colorFindClose: '较相近', colorFindCloser: '很相近', colorFindVeryClose: '极相近', colorFindTile: '第 {n} 个色块',
           slideReady: '点击空格旁边的数字即可移动', slideSolved: '排好了！马上进入下一关',
           slideMoves: '移动 {n} 次', slideBoardSize: '棋盘 {n} × {n}', slideMovesLabel: '移动次数', slideBoardLabel: '棋盘',
           size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
@@ -879,13 +923,15 @@
           homeCopy: 'Ten minutes a day, a lighter mind', speedTitle: 'Schulte Grid', speedCardCopy: 'Tap 1 to 25 in order as fast as you can',
           numberTitle: 'Code Breaker', numberCardCopy: 'The code is always four digits and may repeat', colorTitle: 'Color Logic',
           colorCardCopy: 'Arrange the colors with no repeats', playNow: 'Play now', footer: 'By Lila Chen · 吉',
-          memoryTitle: 'Color Memory', memoryCardCopy: 'Flip the cards and find matching colors', slideTitle: 'Number Slide', slideCardCopy: 'Move the tiles to arrange the numbers from smallest to largest',
+          memoryTitle: 'Color Memory', memoryCardCopy: 'Flip the cards and find matching colors', colorFindTitle: 'Color Odd One Out',
+          colorFindCardCopy: 'Find the one different color among 16 blocks', slideTitle: 'Number Slide', slideCardCopy: 'Move the tiles to arrange the numbers from smallest to largest',
           colorSlideTitle: 'Rescue the Blocks', colorSlideCardCopy: 'Push every block out of the board',
           gomokuTitle: 'Gomoku', gomokuCardCopy: 'Connect five stones in a row, column, or diagonal to win',
           stroopTitle: 'Color Challenge', stroopCardCopy: 'Choose the ink color, not what the word means',
           allGames: 'All games', restart: 'Start over', speedSubtitle: 'Tap 1 to 25 in order as fast as you can',
           numberSubtitle: 'The code stays four digits; the clue gets harder every 8 levels', colorSubtitle: 'The code stays four slots; every 8 levels adds one color option',
-          memorySubtitle: 'Remember where each color is and find every matching pair', slideSubtitle: 'Move the tiles to arrange the numbers from smallest to largest',
+          memorySubtitle: 'Remember where each color is and find every matching pair', colorFindSubtitle: 'Find the one different block in the 4 × 4 grid',
+          slideSubtitle: 'Move the tiles to arrange the numbers from smallest to largest',
           colorSlideSubtitle: 'Push every block out of the board',
           colorSlideReadyTitle: 'Ready?', colorSlideReadyIntro: 'Push every block out of the board',
           colorSlideInstructions: 'Slide blocks along their long side and push them out in the arrow direction; the red block takes three strong pushes', colorSlideMoveLabel: 'Moves',
@@ -915,6 +961,10 @@
           memoryReady: 'Flip two cards and find a matching color', memoryNeedPair: 'Flip one more card', memoryPairGood: 'A match! Keep going',
           memoryPairMiss: 'No match, remember where they are', memoryWin: 'Great job! Next level coming up', memoryCardsAria: 'Color matching cards',
           memoryCardHidden: 'Face-down card {n}', memoryCardShown: 'Revealed color card {n}', memoryCardMatched: 'Matched card {n}',
+          colorFindInstruction: 'Tap the block with a different color', colorFindWrong: 'This one matches; find the different color',
+          colorFindRight: 'Correct! Get ready for the next level', colorFindMistakes: 'Misses: {n}', colorFindCorrectLabel: 'Levels found',
+          colorFindDifficultyLabel: 'Color difference', colorFindStatsAria: 'Color odd-one-out stats', colorFindBoardAria: '4 by 4 color block grid',
+          colorFindObvious: 'Obvious', colorFindClose: 'Close', colorFindCloser: 'Very close', colorFindVeryClose: 'Extremely close', colorFindTile: 'Block {n}',
           slideReady: 'Click a number next to the empty space to move it', slideSolved: 'Solved! Next level coming up',
           slideMoves: '{n} moves', slideBoardSize: 'Board: {n} × {n}', slideMovesLabel: 'Moves', slideBoardLabel: 'Board',
           size3: '3 × 3', size4: '4 × 4', size5: '5 × 5', size6: '6 × 6',
@@ -975,7 +1025,7 @@
       let authUsername = '';
       let authMode = 'login';
       let presenceTimer = 0;
-      const savedGameLevels = { number: 1, color: 1, memory: 1, slide: 1, colorslide: 1, stroop: 1 };
+      const savedGameLevels = { number: 1, color: 1, memory: 1, colorfind: 1, slide: 1, colorslide: 1, stroop: 1 };
       try {
         const savedProgress = JSON.parse(localStorage.getItem(progressStorageKey) || 'null');
         if (savedProgress && savedProgress.levels && typeof savedProgress.levels === 'object') {
@@ -1002,6 +1052,7 @@
       try { bestMs = Number(localStorage.getItem(bestStorageKey)) || 0; } catch (_) {}
       const password = { mode: '', level: 1, length: 4, target: [], guess: [], history: [], locked: false, jumpBackIndex: -1, helpKey: 'initialHelp', helpParams: {}, nextTimer: 0 };
       const memory = { level: getSavedLevel('memory'), pairs: 6, cards: [], matched: new Set(), open: [], flips: 0, turns: 0, locked: false, startedAt: 0, elapsed: 0, clock: 0, pendingTimer: 0, nextTimer: 0, statusKey: 'memoryReady' };
+      const colorFind = { level: getSavedLevel('colorfind'), tiles: [], oddIndex: -1, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, mistakes: 0, correct: 0, finished: false, statusKey: 'colorFindInstruction' };
       const slide = { level: getSavedLevel('slide'), size: 3, tiles: [], moves: 0, startedAt: 0, elapsed: 0, clock: 0, nextTimer: 0, finished: false, statusKey: 'slideReady' };
       const colorSlide = { level: getSavedLevel('colorslide'), blocks: [], puzzle: [], moves: 0, escaped: 0, redPushes: 0, startedAt: 0, elapsed: 0, clock: 0, started: false, finished: false, drag: null };
       let savedGomokuProfile = { skill: 'beginner', beginnerGames: 0, skilledGames: 0 };
@@ -1033,6 +1084,7 @@
       const speedPanel = $('speed-panel');
       const passwordPanel = $('password-panel');
       const memoryPanel = $('memory-panel');
+      const colorFindPanel = $('colorfind-panel');
       const slidePanel = $('slide-panel');
       const colorSlidePanel = $('color-slide-panel');
       const gomokuPanel = $('gomoku-panel');
@@ -1067,6 +1119,7 @@
         }
         if (activeGame === 'number' || activeGame === 'color') renderPassword();
         if (activeGame === 'memory') renderMemory();
+        if (activeGame === 'colorfind') renderColorFind();
         if (activeGame === 'slide') renderSlide();
         if (activeGame === 'colorslide') renderColorSlide();
         if (activeGame === 'gomoku') { renderGomokuSetup(); if (gomoku.active) renderGomokuBoard(); }
@@ -1081,7 +1134,8 @@
       function renderGameHeading() {
         const gameKeys = {
           speed: ['speedTitle', 'speedSubtitle'], number: ['numberTitle', 'numberSubtitle'], color: ['colorTitle', 'colorSubtitle'],
-          memory: ['memoryTitle', 'memorySubtitle'], slide: ['slideTitle', 'slideSubtitle'], gomoku: ['gomokuTitle', 'gomokuSubtitle'],
+          memory: ['memoryTitle', 'memorySubtitle'], colorfind: ['colorFindTitle', 'colorFindSubtitle'],
+          slide: ['slideTitle', 'slideSubtitle'], gomoku: ['gomokuTitle', 'gomokuSubtitle'],
           stroop: ['stroopTitle', 'stroopSubtitle'], colorslide: ['colorSlideTitle', 'colorSlideSubtitle']
         };
         const [titleKey, subtitleKey] = gameKeys[activeGame] || gameKeys.speed;
@@ -1186,13 +1240,15 @@
         colorSlide.clock = 0;
       }
       function memoryElapsed() { return memory.startedAt ? performance.now() - memory.startedAt : memory.elapsed; }
+      function colorFindElapsed() { return colorFind.startedAt ? performance.now() - colorFind.startedAt : colorFind.elapsed; }
       function slideElapsed() { return slide.startedAt ? performance.now() - slide.startedAt : slide.elapsed; }
       function colorSlideElapsed() { return colorSlide.startedAt ? performance.now() - colorSlide.startedAt : colorSlide.elapsed; }
       function updateMemoryClock() { if (activeGame === 'memory') $('memory-clock').textContent = formatTime(memoryElapsed()); }
+      function updateColorFindClock() { if (activeGame === 'colorfind' && !colorFind.finished) $('colorfind-clock').textContent = formatTime(colorFindElapsed()); }
       function updateSlideClock() { if (activeGame === 'slide') $('slide-clock').textContent = formatTime(slideElapsed()); }
       function updateColorSlideClock() { if (activeGame === 'colorslide' && !colorSlide.finished) $('color-slide-clock').textContent = formatTime(colorSlideElapsed()); }
-      function getMemoryPairs(level = memory.level) { return 6 + Math.floor((level - 1) / 9); }
-      function getMemoryColumns(pairs) { return pairs <= 8 ? 4 : pairs <= 18 ? 6 : 8; }
+      function getMemoryPairs(level = memory.level) { return 6 + 2 * Math.floor(level / 9); }
+      function getMemoryColumns() { return 4; }
       function getMemoryColor(index) {
         if (index < palette.length) return palette[index].hex;
         return `hsl(${Math.round((index * 137.508) % 360)} 42% 62%)`;
@@ -1309,6 +1365,106 @@
             $('memory-status').textContent = t(memory.statusKey);
           }, 850);
         }
+      }
+
+      function stopColorFindClock() {
+        if (colorFind.clock) window.clearInterval(colorFind.clock);
+        colorFind.clock = 0;
+      }
+      function colorFindHsl(hex) {
+        const value = hex.replace('#', '');
+        const r = parseInt(value.slice(0, 2), 16) / 255;
+        const g = parseInt(value.slice(2, 4), 16) / 255;
+        const b = parseInt(value.slice(4, 6), 16) / 255;
+        const max = Math.max(r, g, b); const min = Math.min(r, g, b);
+        let h = 0; let s = 0; let l = (max + min) / 2;
+        if (max !== min) {
+          const d = max - min;
+          s = l > .5 ? d / (2 - max - min) : d / (max + min);
+          if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+          else if (max === g) h = (b - r) / d + 2;
+          else h = (r - g) / d + 4;
+          h /= 6;
+        }
+        return [h * 360, s * 100, l * 100];
+      }
+      function colorFindDifference(level = colorFind.level) {
+        if (level <= 10) return 22;
+        if (level <= 20) return 14;
+        if (level <= 40) return 8;
+        if (level <= 60) return 5;
+        if (level <= 80) return 4;
+        return Math.max(2, 4 - Math.floor((level - 80) / 20));
+      }
+      function colorFindDifficultyName(level = colorFind.level) {
+        if (level <= 10) return t('colorFindObvious');
+        if (level <= 20) return t('colorFindClose');
+        if (level <= 40) return t('colorFindCloser');
+        return t('colorFindVeryClose');
+      }
+      function startColorFindGame() {
+        colorFind.level = getSavedLevel('colorfind');
+        colorFind.correct = 0;
+        colorFind.mistakes = 0;
+        beginColorFindLevel();
+      }
+      function beginColorFindLevel() {
+        window.clearTimeout(colorFind.nextTimer);
+        stopColorFindClock();
+        colorFind.level = getSavedLevel('colorfind');
+        const [hue, saturation, originalLightness] = colorFindHsl(palette[Math.floor(Math.random() * palette.length)].hex);
+        const baseLightness = Math.max(32, Math.min(68, originalLightness));
+        const delta = colorFindDifference();
+        const direction = Math.random() < .5 ? -1 : 1;
+        let oddLightness = baseLightness + delta * direction;
+        if (oddLightness < 12 || oddLightness > 88) oddLightness = baseLightness - delta * direction;
+        const baseColor = `hsl(${hue.toFixed(1)} ${saturation.toFixed(1)}% ${baseLightness.toFixed(1)}%)`;
+        const oddColor = `hsl(${hue.toFixed(1)} ${saturation.toFixed(1)}% ${oddLightness.toFixed(1)}%)`;
+        colorFind.tiles = shuffle(Array.from({ length: 16 }, (_, index) => ({ color: index === 0 ? oddColor : baseColor, odd: index === 0 })));
+        colorFind.oddIndex = colorFind.tiles.findIndex((tile) => tile.odd);
+        colorFind.startedAt = performance.now(); colorFind.elapsed = 0;
+        colorFind.finished = false; colorFind.statusKey = 'colorFindInstruction';
+        colorFind.clock = window.setInterval(updateColorFindClock, 100);
+        renderColorFind();
+      }
+      function renderColorFind() {
+        $('colorfind-level').textContent = t('level', { n: colorFind.level });
+        $('colorfind-clock').textContent = formatTime(colorFindElapsed());
+        $('colorfind-mistakes').textContent = t('colorFindMistakes', { n: colorFind.mistakes });
+        $('colorfind-correct').textContent = String(colorFind.correct);
+        $('colorfind-difficulty').textContent = colorFindDifficultyName();
+        $('colorfind-board').setAttribute('aria-label', t('colorFindBoardAria'));
+        const board = $('colorfind-board');
+        board.replaceChildren();
+        colorFind.tiles.forEach((tile, index) => {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = 'colorfind-tile';
+          button.style.backgroundColor = tile.color;
+          button.disabled = colorFind.finished;
+          button.setAttribute('aria-label', t('colorFindTile', { n: index + 1 }));
+          button.addEventListener('click', () => chooseColorFindTile(index));
+          board.append(button);
+        });
+        $('colorfind-status').textContent = t(colorFind.statusKey);
+        $('colorfind-status').className = `status${colorFind.finished ? ' good' : ''}`;
+      }
+      function chooseColorFindTile(index) {
+        if (colorFind.finished) return;
+        if (index !== colorFind.oddIndex) {
+          colorFind.mistakes++;
+          const tile = $('colorfind-board').children[index];
+          tile.classList.remove('wrong'); void tile.offsetWidth; tile.classList.add('wrong');
+          colorFind.statusKey = 'colorFindWrong';
+          $('colorfind-mistakes').textContent = t('colorFindMistakes', { n: colorFind.mistakes });
+          $('colorfind-status').textContent = t(colorFind.statusKey);
+          return;
+        }
+        colorFind.elapsed = colorFindElapsed(); colorFind.startedAt = 0;
+        colorFind.finished = true; colorFind.correct++; colorFind.statusKey = 'colorFindRight';
+        stopColorFindClock();
+        saveGameLevel('colorfind', colorFind.level + 1);
+        renderColorFind();
+        colorFind.nextTimer = window.setTimeout(beginColorFindLevel, 800);
       }
 
       function getSlideSize(level = slide.level) {
@@ -1817,11 +1973,13 @@
         if (gomoku.over) return;
         gomoku.over = true; gomoku.thinking = false; gomoku.statusKey = statusKey; gomoku.winningCells = winningLine;
         if (!gomoku.resultRecorded) {
-          gomoku.gamesPlayed++;
-          gomoku.skillGames[gomoku.skill] = gomoku.gamesPlayed;
-          gomoku.level = gomokuLevelFor(gomoku.skill, gomoku.gamesPlayed);
+          if (statusKey === 'gomokuYouWin') {
+            gomoku.gamesPlayed++;
+            gomoku.skillGames[gomoku.skill] = gomoku.gamesPlayed;
+            gomoku.level = gomokuLevelFor(gomoku.skill, gomoku.gamesPlayed);
+            saveGomokuProgress();
+          }
           gomoku.resultRecorded = true;
-          saveGomokuProgress();
         }
         renderGomokuBoard();
       }
@@ -2225,13 +2383,14 @@
       function openGame(id) {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
+        window.clearTimeout(colorFind.nextTimer); stopColorFindClock();
         window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock();
         window.clearTimeout(gomoku.aiTimer); gomoku.aiTimer = 0; stopStroopClock();
         activeGame = id;
         homeView.hidden = true; gameView.hidden = false;
         speedPanel.hidden = id !== 'speed';
         passwordPanel.hidden = id !== 'number' && id !== 'color';
-        memoryPanel.hidden = id !== 'memory'; slidePanel.hidden = id !== 'slide';
+        memoryPanel.hidden = id !== 'memory'; colorFindPanel.hidden = id !== 'colorfind'; slidePanel.hidden = id !== 'slide';
         colorSlidePanel.hidden = id !== 'colorslide';
         gomokuPanel.hidden = id !== 'gomoku';
         stroopPanel.hidden = id !== 'stroop';
@@ -2239,6 +2398,7 @@
         if (id === 'speed') { prepareSpeedGame(); void refreshSchulteLeaderboard(); }
         else if (id === 'number' || id === 'color') startPasswordGame(id);
         else if (id === 'memory') startMemoryGame();
+        else if (id === 'colorfind') startColorFindGame();
         else if (id === 'slide') startSlideGame();
         else if (id === 'colorslide') prepareColorSlideGame();
         else if (id === 'gomoku') resetGomokuSetup();
@@ -2248,6 +2408,7 @@
       function goHome() {
         window.clearTimeout(password.nextTimer);
         window.clearTimeout(memory.pendingTimer); window.clearTimeout(memory.nextTimer); stopMemoryClock();
+        window.clearTimeout(colorFind.nextTimer); stopColorFindClock();
         window.clearTimeout(slide.nextTimer); stopSlideClock(); stopColorSlideClock(); stopSpeedClock(); stopStroopClock();
         resetGomokuSetup(); activeGame = '';
         gameView.hidden = true; homeView.hidden = false;
@@ -2261,6 +2422,7 @@
         if (activeGame === 'speed') prepareSpeedGame();
         else if (activeGame === 'number' || activeGame === 'color') beginPasswordLevel();
         else if (activeGame === 'memory') beginMemoryLevel();
+        else if (activeGame === 'colorfind') beginColorFindLevel();
         else if (activeGame === 'slide') beginSlideLevel();
         else if (activeGame === 'colorslide') beginColorSlideLevel(false, false);
         else if (activeGame === 'gomoku') restartGomokuMatch();
